@@ -1,88 +1,33 @@
-import React, { useCallback } from 'react';
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
+import { useEffect, useState } from "react";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadLinksPreset } from "tsparticles-preset-links"; // 1. Import the preset
 
 const ParticleBackground = () => {
-    // We are putting the config directly in this file now
-    const particlesConfig = {
-        fullScreen: {
-            enable: true,
-            zIndex: -1
-        },
-        particles: {
-            number: {
-                value: 80,
-                density: {
-                    enable: true,
-                    value_area: 800
-                }
-            },
-            color: {
-                value: ["#2EB67D", "#4A89DC", "#FFFFFF", "#2ECC71"]
-            },
-            shape: {
-                type: "circle"
-            },
-            opacity: {
-                value: 0.7,
-                random: true,
-            },
-            size: {
-                value: 3,
-                random: true,
-            },
-            links: {
-                enable: true,
-                distance: 150,
-                color: "#4A89DC",
-                opacity: 0.4,
-                width: 1
-            },
-            move: {
-                enable: true,
-                speed: 2,
-                direction: "none",
-                outModes: {
-                    default: "out"
-                },
-            }
-        },
-        interactivity: {
-            detectsOn: "canvas",
-            events: {
-                onHover: {
-                    enable: true,
-                    mode: "repulse"
-                },
-                onClick: {
-                    enable: true,
-                    mode: "push"
-                },
-                resize: true
-            },
-            modes: {
-                repulse: {
-                    distance: 100
-                },
-                push: {
-                    quantity: 4
-                }
-            }
-        },
-        detectRetina: true
-    };
+  const [init, setInit] = useState(false);
 
-    const particlesInit = useCallback(async (engine) => {
-        await loadFull(engine);
-    }, []);
+  // This will run only once to initialize the particle engine
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      // 2. Load the preset into the engine
+      await loadLinksPreset(engine); 
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
 
-    return (
-        <Particles
-            id="tsparticles"
-            init={particlesInit}
-            options={particlesConfig} 
-        />
-    );
+  // 3. Optional: Customize the preset here if you want
+  const options = {
+    preset: "links", // 4. Tell tsParticles to use the loaded preset
+    background: {
+      color: "#0d1117", // Set your desired background color
+    },
+  };
+
+  if (init) {
+    return <Particles id="tsparticles" options={options} />;
+  }
+
+  return <></>; // Return nothing while the engine is loading
 };
 
 export default ParticleBackground;

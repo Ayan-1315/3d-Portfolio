@@ -14,19 +14,17 @@ body {
 
 /* This is the content that sits ON TOP of the particle background */
 .hero-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Full screen height */
-    position: relative; /* Needed to ensure it stays above the z-index: -1 background */
-    z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* Keep this */
+  z-index: 1;         /* Keep this */
 }
 
-.hero-content h1 {
-    font-size: 4rem;
-    margin: 0;
-    color: #ffffff;
+.hero-content h1, .hero-content p {
+  color: white; /* Ensure text is visible */
 }
 
 .hero-content p {
