@@ -23,7 +23,7 @@ body {
   z-index: 1;         /* Keep this */
 }
 
-.hero-content h1, .hero-content p {
+.hero-content h1 {
   color: white; /* Ensure text is visible */
 }
 

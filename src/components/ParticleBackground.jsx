@@ -1,25 +1,93 @@
 import { useEffect, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadLinksPreset } from "tsparticles-preset-links"; // 1. Import the preset
+import { loadFull } from "tsparticles";
 
 const ParticleBackground = () => {
   const [init, setInit] = useState(false);
 
-  // This will run only once to initialize the particle engine
   useEffect(() => {
     initParticlesEngine(async (engine) => {
-      // 2. Load the preset into the engine
-      await loadLinksPreset(engine); 
+      await loadFull(engine);
     }).then(() => {
       setInit(true);
     });
   }, []);
 
-  // 3. Optional: Customize the preset here if you want
   const options = {
-    preset: "links", // 4. Tell tsParticles to use the loaded preset
     background: {
-      color: "#0d1117", // Set your desired background color
+      color: "#000000",
+    },
+    fullScreen: {
+      zIndex: -1,
+    },
+    particles: {
+      number: {
+        value: 80,
+        density: {
+          enable: true,
+          value_area: 800,
+        },
+      },
+      color: {
+        value: ["#3998D0", "#2EB67D", "#E9446A", "#A640B2"],
+      },
+      shape: {
+        type: "circle",
+      },
+      opacity: {
+        value: { min: 0.3, max: 0.8 },
+      },
+      size: {
+        value: { min: 2, max: 4 },
+      },
+      links: {
+        enable: true,
+        distance: 150,
+        color: "random", // This will use the particle's color
+        opacity: 0.6,
+        width: 1,
+        warp: true,
+      },
+      move: {
+        enable: true,
+        speed: 3,
+        direction: "none",
+        random: false,
+        straight: false,
+        outModes: { // ✅ Corrected property name from 'out_mode'
+          default: "out",
+        },
+        attract: {
+          enable: true,
+          rotate: { // ✅ Corrected property names
+            x: 600,
+            y: 1200,
+          },
+        },
+      },
+    },
+    interactivity: {
+      events: {
+        onHover: {
+          enable: true,
+          mode: "bubble",
+        },
+        onClick: {
+          enable: true,
+          mode: "push",
+        },
+      },
+      modes: {
+        bubble: {
+          distance: 250,
+          size: 8,
+          duration: 2,
+          opacity: 0.8,
+        },
+        push: {
+          quantity: 10,
+        },
+      },
     },
   };
 
@@ -27,7 +95,7 @@ const ParticleBackground = () => {
     return <Particles id="tsparticles" options={options} />;
   }
 
-  return <></>; // Return nothing while the engine is loading
+  return <></>;
 };
 
 export default ParticleBackground;
