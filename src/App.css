@@ -1,0 +1,35 @@
+/* You can put this here or in index.css */
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #0d1117;
+    color: #c9d1d9;
+}
+
+
+/* Main App container */
+.App {
+    text-align: center;
+}
+
+/* This is the content that sits ON TOP of the particle background */
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full screen height */
+    position: relative; /* Needed to ensure it stays above the z-index: -1 background */
+    z-index: 1;
+}
+
+.hero-content h1 {
+    font-size: 4rem;
+    margin: 0;
+    color: #ffffff;
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    color: #8b949e;
+}
