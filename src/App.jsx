@@ -1,19 +1,19 @@
 import React from 'react';
-import ParticleBackground from './components/ParticleBackground'; // Import the component
-import './App.css'; // Make sure you have this CSS file linked
+import ParticleBackground from './components/ParticleBackground'; 
+import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <ParticleBackground /> {/* Add the background component here */}
+      <ParticleBackground /> {/* ✅ MOVED to be a direct child of "App" */}
       
       {/* Your Hero Content */}
       <div className="hero-content">
+        {/* ❌ REMOVED from here */}
         <h1>Your Name</h1>
         <p>Software Developer</p>
       </div>
 
-      {/* The rest of your portfolio sections will go here */}
     </div>
   );
 }
