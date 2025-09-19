@@ -1,40 +1,50 @@
-/* Hero left-aligned layout + refined visuals */
+/* src/components/Hero.css
+   Responsive: 8-rule grid + fluid typography + breakpoints
+*/
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 :root{
-  --teal-rgb: 25, 215, 201;      /* 19d7c9 in RGB */
-  --hero-glow-strong: 0.22;      /* glow alpha for H1 */
-  --hero-glow-med: 0.14;         /* glow alpha for subtitle */
-  --hero-glow-subtle: 0.08;      /* tagline / small text */
+  --teal-rgb: 25, 215, 201;
+  --hero-glow-strong: 0.20;
+  --hero-glow-med: 0.12;
+  --hero-glow-subtle: 0.06;
+
+  /* 8-rule grid unit (percentage of viewport width) */
+  --grid-unit: 12.5%;
+
+  /* hero placement multipliers (can be adjusted for layout) */
+  --hero-left-m: 1.25;  /* multiply by grid unit -> left offset */
+  --hero-top-m: 2.25;   /* multiply by grid unit -> top offset */
+
   --bg-grad-start: #071016;
   --bg-grad-end: #0b1416;
+
+  /* max widths (to prevent giant lines on massive screens) */
+  --hero-max-width: 640px;
+  --hero-font-scale: 1; /* used for fine tuning on very large screens */
 }
 
-/* reset */
+/* resets */
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; padding: 0; }
-
 body {
   font-family: 'Poppins', sans-serif;
   color: #fff;
   margin: 0;
   background: linear-gradient(180deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* container keeps particles inside and centers vertically */
+/* hero container: uses absolute positioned elements for precise grid placement */
 .hero-container {
   position: relative;
   min-height: 100vh;
   height: 100vh;
-  display: flex;
-  align-items: center;      /* vertical center */
-  justify-content: flex-start; /* left align content area */
-  padding: 0 8vw;
   overflow: hidden;
 }
 
-/* particles canvas: behind UI */
+/* particles canvas behind UI */
 #tsparticles {
   position: absolute !important;
   inset: 0 !important;
@@ -42,30 +52,61 @@ body {
   height: 100% !important;
   z-index: 1;
   pointer-events: none;
-  opacity: 1;
 }
 
-/* UI unified at z-index:2 */
+/* unify UI layers */
 .hero-content,
 .social-icons,
-.cta-button {
-  position: relative;
-  z-index: 2;
-}
+.cta-button { position: absolute; z-index: 2; }
 
-/* left block for hero text */
+/* ---------- 8-rule placement: hero content ---------- */
+/* Left/top based on grid multipliers (fluid positions) */
 .hero-content {
-  max-width: 640px;
+  left: calc(var(--grid-unit) * var(--hero-left-m));
+  top: calc(var(--grid-unit) * var(--hero-top-m));
+  max-width: var(--hero-max-width);
   text-align: left;
-  margin-left: 4vw; /* push in from left edge */
   color: #f5f7f7;
+  transform: translateZ(0); /* promote to own layer */
 }
 
-/* large bold name similar to the reference */
+/* social icons placed in top-right grid area */
+.social-icons {
+  right: calc(var(--grid-unit) * 0.75); /* slight offset */
+  top: calc(var(--grid-unit) * 0.5);
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+/* social icon box appearance */
+.social-icons a {
+  color: rgba(255,255,255,0.92);
+  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: transform .14s ease, color .14s ease, background .14s ease;
+  background: rgba(255,255,255,0.02);
+  padding: 6px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+.social-icons a:hover {
+  color: #19d7c9;
+  transform: translateY(-4px) scale(1.05);
+  background: rgba(25,215,201,0.04);
+}
+
+/* hero typography: fluid & accessible */
 .hero-content h1 {
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
   font-weight: 800;
-  font-size: clamp(3rem, 6.4vw, 5.2rem); /* big, responsive */
+  /* responsive headline using clamp; scaled by --hero-font-scale */
+  font-size: calc(clamp(2.4rem, 5.2vw, 5.2rem) * var(--hero-font-scale));
   line-height: 0.95;
   letter-spacing: -1px;
   color: #ffffff;
@@ -73,121 +114,136 @@ body {
   align-items: center;
   gap: 12px;
 
-  /* keep the main text color white so contrast stays high */
-  /* stacked shadows: thin edge, inner neon, medium outer glow, soft long bloom */
   text-shadow:
     0 1px 0 rgba(0,0,0,0.45),
     0 0 6px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.9)),
-    0 0 18px rgba(var(--teal-rgb), var(--hero-glow-strong)),
-    0 0 36px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.5));
-  transform: translateZ(0);
+    0 0 16px rgba(var(--teal-rgb), var(--hero-glow-strong)),
+    0 0 28px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.45));
 }
 
-/* teal code icon style */
+/* teal code icon */
 .code-icon {
   color: #19d7c9;
   font-weight: 700;
-  font-size: 1.1em;
+  font-size: 1.05em;
   transform: translateY(-2px);
   text-shadow:
-    0 0 6px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1.0)),
-    0 0 18px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.6));
+    0 0 6px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1)),
+    0 0 16px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.6));
 }
 
 /* subtitle */
 .subtitle {
   margin: 0;
-  margin-top: 10px;
+  margin-top: 8px;
   font-weight: 300;
-  font-size: clamp(1.05rem, 1.6vw, 1.4rem);
-  color: rgba(255,255,255,0.9);
+  font-size: clamp(1rem, 1.6vw, 1.4rem);
+  color: rgba(255,255,255,0.95);
   text-shadow:
-    0 0 6px rgba(var(--teal-rgb), var(--hero-glow-med)),
-    0 0 12px rgba(var(--teal-rgb), calc(var(--hero-glow-med) * 0.6));
+    0 0 6px rgba(var(--teal-rgb), var(--hero-glow-med));
 }
 
-/* thin divider line */
+/* divider and tagline */
 .hero-divider {
-  margin-top: 28px;
-  margin-bottom: 28px;
+  margin-top: 22px;
+  margin-bottom: 22px;
   height: 1px;
   width: 56%;
   background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
   border-radius: 2px;
 }
-
-/* italic tagline */
 .tagline {
+  margin-top: 8px;
   font-style: italic;
   color: rgba(255,255,255,0.75);
-  margin-top: 8px;
-  text-shadow:
-    0 0 6px rgba(var(--teal-rgb), var(--hero-glow-subtle));
+  text-shadow: 0 0 6px rgba(var(--teal-rgb), var(--hero-glow-subtle));
 }
 
-/* CTA: subtle transparent button / text */
+/* CTA (bottom-left) using 8-rule offsets */
 .cta-button {
+  left: calc(var(--grid-unit) * 0.5);
+  bottom: calc(var(--grid-unit) * 0.5);
   position: absolute;
-  bottom: 28px;
-  left: 40px;
-  z-index: 2;
-  color: rgba(255,255,255,0.95);
-  text-decoration: none;
   display: inline-flex;
   gap: 10px;
   align-items: center;
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
   font-weight: 400;
-  transition: transform .16s ease, color .16s ease;
   padding: 6px 0;
-  border-radius: 4px;
-}
-
-.cta-button:hover {
-  transform: translateY(-3px);
-  color: #19d7c9;
-}
-
-/* social icons top-right */
-.social-icons {
-  position: absolute;
-  top: 28px;
-  right: 36px;
-  display: flex;
-  gap: 18px;
+  transition: transform .16s ease, color .16s ease;
   z-index: 2;
 }
+.cta-button:hover { color: #19d7c9; transform: translateY(-3px); }
 
-.social-icons a {
-  color: rgba(255,255,255,0.9);
-  text-decoration: none;
-  font-size: 1.25rem;
-  transition: transform .14s ease, color .14s ease;
+/* ---------- adaptive breakpoints ---------- */
+
+/* Large desktops (very wide screens) */
+@media (min-width: 1600px) {
+  :root { --hero-font-scale: 1.05; }
+  :root { --hero-left-m: 1.5; }  /* nudge slightly inward on ultra-wide */
+  .hero-content { max-width: 780px; }
+  .hero-divider { width: 48%; }
 }
 
-.social-icons a:hover { color: #19d7c9; transform: scale(1.12); }
+/* Desktop / laptop */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  :root { --hero-font-scale: 1; }
+  :root { --hero-left-m: 1.4; }
+  .hero-content { max-width: 720px; }
+}
 
-/* hover intensify (desktop only) */
-@media (hover: hover) {
-  .hero-content h1:hover,
-  .hero-content h1:focus {
-    text-shadow:
-      0 1px 0 rgba(0,0,0,0.45),
-      0 0 8px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1.1)),
-      0 0 26px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1.05)),
-      0 0 48px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.6));
+/* Tablet landscape and smaller laptops */
+@media (min-width: 881px) and (max-width: 1199px) {
+  :root { --hero-left-m: 1.2; --hero-top-m: 2.0; }
+  .hero-content { max-width: 680px; }
+  .hero-content h1 { font-size: clamp(2.6rem, 6.0vw, 4.2rem); }
+}
+
+/* Tablet portrait and large phones */
+@media (max-width: 880px) {
+  :root { --grid-unit: 12.5%; } /* unchanged but keep explicit */
+  /* move the content slightly lower and more centered on medium screens */
+  .hero-content {
+    left: calc(var(--grid-unit) * 1.0);
+    top: calc(var(--grid-unit) * 2.8);
+    max-width: 86%;
+  }
+  .hero-divider { width: 72%; }
+  .social-icons {
+    right: calc(var(--grid-unit) * 0.5);
+    top: calc(var(--grid-unit) * 0.45);
+    gap: 14px;
   }
 }
 
-/* responsive adjustments */
-@media (max-width: 880px) {
-  .hero-content { margin-left: 6vw; max-width: 86%; }
-  .hero-content h1 { font-size: clamp(2.2rem, 8vw, 3.6rem); }
-  .hero-divider { width: 80%; }
+/* Small phones */
+@media (max-width: 520px) {
+  /* center content for small screens */
+  .hero-content {
+    left: 50%;
+    top: 14%;
+    transform: translate(-50%, 0);
+    text-align: center;
+    max-width: 92%;
+  }
+  .hero-content h1 {
+    font-size: clamp(1.8rem, 9.5vw, 2.6rem);
+    line-height: 1.02;
+  }
+  .hero-divider { width: 88%; margin: 18px auto; }
+  .social-icons {
+    right: 12px;
+    top: 12px;
+    gap: 12px;
+  }
+  .cta-button { left: 14px; bottom: 12px; }
+  .social-icons a { width: 36px; height: 36px; font-size: 1.05rem; }
 }
 
-@media (max-width: 520px) {
-  .hero-container { justify-content: center; padding: 0 6vw; }
-  .hero-content { text-align: center; margin-left: 0; }
-  .cta-button { left: 16px; bottom: 18px; }
-  .social-icons { right: 16px; top: 16px; }
+/* Very tiny screens (old phones / tiny viewports) */
+@media (max-width: 360px) {
+  .hero-content h1 { font-size: clamp(1.6rem, 10.5vw, 2.2rem); }
+  .subtitle { font-size: 0.95rem; }
+  :root { --hero-glow-strong: 0.12; --hero-glow-med: 0.08; --hero-glow-subtle: 0.04; }
 }
