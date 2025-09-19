@@ -26,7 +26,7 @@ const ParticleBackground = () => {
         },
       },
       color: {
-        value: ["#00FFFF", "#FF00FF", "#00FF00"], // Neon Colors
+        value: ["#00FFFF", "#FF00FF", "#abcc26ff"], // Neon Colors
       },
       shape: {
         type: "circle",
@@ -40,7 +40,7 @@ const ParticleBackground = () => {
       links: {
         enable: true,
         distance: 150,
-        color: "#1fd769ff", // ✅ Link color is now neon cyan
+        color: "#1fd7b8ff", // ✅ Link color is now neon cyan
         opacity: 0.4,
         width: 1,
         warp: true,
