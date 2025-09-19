@@ -1,16 +1,15 @@
+// src/App.jsx
 import React from 'react';
 import ParticleBackground from './components/ParticleBackground';
-import './App.css';
+import Hero from './components/Hero';
+import './App.css'; // You might have this file, or index.css
 
 function App() {
   return (
     <div className="App">
       <ParticleBackground />
-      
-      <div className="hero-content">
-        <h1>Your Name</h1>
-        <p>Software Developer</p>
-      </div>
+      <Hero />
+      {/* Add other sections of your portfolio below, e.g., <Projects />, <About />, etc. */}
     </div>
   );
 }

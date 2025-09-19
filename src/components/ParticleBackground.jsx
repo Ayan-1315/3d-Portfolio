@@ -1,104 +1,86 @@
-import { useEffect, useState } from "react";
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadFull } from "tsparticles";
+import React, { useCallback } from 'react';
+import Particles from 'react-tsparticles';
+import { loadFull } from 'tsparticles';
 
 const ParticleBackground = () => {
-  const [init, setInit] = useState(false);
-
-  useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadFull(engine);
-    }).then(() => {
-      setInit(true);
-    });
+  const particlesInit = useCallback(async (engine) => {
+    // This loads the full tsparticles bundle, you can load smaller bundles if you want
+    await loadFull(engine);
   }, []);
 
-  const options = {
+  const particlesOptions = {
     background: {
-      color: "#0a0a0d",
-    },
-    particles: {
-      number: {
-        value: 150,
-        density: {
-          enable: true,
-          value_area: 800,
-        },
-      },
       color: {
-        value: ["#00FFFF", "#FF00FF", "#abcc26ff"], // Neon Colors
-      },
-      shape: {
-        type: "circle",
-      },
-      opacity: {
-        value: { min: 0.1, max: 0.6 },
-      },
-      size: {
-        value: { min: 1, max: 2.5 },
-      },
-      links: {
-        enable: true,
-        distance: 150,
-        color: "#1fd7b8ff", // ✅ Link color is now neon cyan
-        opacity: 0.4,
-        width: 1,
-        warp: true,
-      },
-      move: {
-        enable: true,
-        speed: 1,
-        direction: "none",
-        random: true,
-        straight: false,
-        outModes: {
-          default: "out",
-        },
-        attract: {
-          enable: true,
-          rotate: {
-            x: 600,
-            y: 1200,
-          },
-        },
+        value: '#0d1117', // A dark color similar to GitHub's dark mode
       },
     },
+    fpsLimit: 60,
     interactivity: {
       events: {
         onHover: {
           enable: true,
-          mode: ["bubble", "repulse"], // ✅ Grab mode removed
+          mode: 'repulse',
         },
-        onClick: {
-          enable: true,
-          mode: "push",
-        },
+        resize: true,
       },
       modes: {
-        // "grab" configuration has been removed
-        bubble: {
-          distance: 200,
-          size: 6,
-          duration: 2,
-          opacity: 1,
-        },
         repulse: {
           distance: 100,
           duration: 0.4,
         },
-        push: {
-          quantity: 4,
+      },
+    },
+    particles: {
+      color: {
+        value: '#00bcd4', // The teal/cyan color for particles and links
+      },
+      links: {
+        color: '#00bcd4',
+        distance: 150,
+        enable: true,
+        opacity: 0.3,
+        width: 1,
+      },
+      collisions: {
+        enable: true,
+      },
+      move: {
+        direction: 'none',
+        enable: true,
+        outModes: {
+          default: 'bounce',
         },
+        random: false,
+        speed: 1.5,
+        straight: false,
+      },
+      number: {
+        density: {
+          enable: true,
+          area: 800,
+        },
+        value: 80,
+      },
+      opacity: {
+        value: 0.3,
+      },
+      shape: {
+        type: 'circle',
+      },
+      size: {
+        value: { min: 1, max: 5 },
       },
     },
     detectRetina: true,
   };
 
-  if (init) {
-    return <Particles id="tsparticles" options={options} />;
-  }
-
-  return <></>;
+  return (
+    <Particles
+      id="tsparticles"
+      init={particlesInit}
+      options={particlesOptions}
+    />
+  );
 };
 
 export default ParticleBackground;

@@ -1,0 +1,93 @@
+/* Using a modern font is a good idea */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #ffffff;
+  margin: 0;
+  overflow-x: hidden; /* Prevents horizontal scroll */
+}
+
+/* Main Hero Container */
+.hero-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100vh;
+  position: relative; /* Needed for absolute positioning of children */
+  z-index: 1;
+}
+
+/* Social Icons (Top Right) */
+.social-icons {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  display: flex;
+  gap: 20px;
+}
+
+.social-icons a {
+  color: #ffffff;
+  font-size: 1.8rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #00bcd4; /* Accent color */
+  transform: scale(1.2);
+}
+
+/* Main Content (Center) */
+.hero-content {
+  max-width: 800px;
+}
+
+.hero-content h1 {
+  font-size: 4rem;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.code-icon {
+  color: #00bcd4; /* Accent color */
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 10px;
+}
+
+.tagline {
+  font-size: 1.1rem;
+  margin-top: 20px;
+}
+
+/* CTA Button (Bottom Left) */
+.cta-button {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.cta-button:hover {
+  color: #00bcd4;
+  transform: translateY(-5px);
+}
+
+.arrow-icon {
+  font-size: 1.2rem;
+}
