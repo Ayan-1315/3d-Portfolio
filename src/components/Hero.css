@@ -1,93 +1,193 @@
-/* Using a modern font is a good idea */
+/* Hero left-aligned layout + refined visuals */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root{
+  --teal-rgb: 25, 215, 201;      /* 19d7c9 in RGB */
+  --hero-glow-strong: 0.22;      /* glow alpha for H1 */
+  --hero-glow-med: 0.14;         /* glow alpha for subtitle */
+  --hero-glow-subtle: 0.08;      /* tagline / small text */
+  --bg-grad-start: #071016;
+  --bg-grad-end: #0b1416;
+}
+
+/* reset */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; padding: 0; }
 
 body {
   font-family: 'Poppins', sans-serif;
-  color: #ffffff;
+  color: #fff;
   margin: 0;
-  overflow-x: hidden; /* Prevents horizontal scroll */
+  background: linear-gradient(180deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Main Hero Container */
+/* container keeps particles inside and centers vertically */
 .hero-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  position: relative;
+  min-height: 100vh;
   height: 100vh;
-  position: relative; /* Needed for absolute positioning of children */
-  z-index: 1;
-}
-
-/* Social Icons (Top Right) */
-.social-icons {
-  position: absolute;
-  top: 30px;
-  right: 40px;
   display: flex;
-  gap: 20px;
+  align-items: center;      /* vertical center */
+  justify-content: flex-start; /* left align content area */
+  padding: 0 8vw;
+  overflow: hidden;
 }
 
-.social-icons a {
-  color: #ffffff;
-  font-size: 1.8rem;
-  transition: color 0.3s ease, transform 0.3s ease;
+/* particles canvas: behind UI */
+#tsparticles {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 1;
 }
 
-.social-icons a:hover {
-  color: #00bcd4; /* Accent color */
-  transform: scale(1.2);
+/* UI unified at z-index:2 */
+.hero-content,
+.social-icons,
+.cta-button {
+  position: relative;
+  z-index: 2;
 }
 
-/* Main Content (Center) */
+/* left block for hero text */
 .hero-content {
-  max-width: 800px;
+  max-width: 640px;
+  text-align: left;
+  margin-left: 4vw; /* push in from left edge */
+  color: #f5f7f7;
 }
 
+/* large bold name similar to the reference */
 .hero-content h1 {
-  font-size: 4rem;
-  margin: 0;
-  font-weight: 700;
-  letter-spacing: 2px;
+  margin: 0 0 8px 0;
+  font-weight: 800;
+  font-size: clamp(3rem, 6.4vw, 5.2rem); /* big, responsive */
+  line-height: 0.95;
+  letter-spacing: -1px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  /* keep the main text color white so contrast stays high */
+  /* stacked shadows: thin edge, inner neon, medium outer glow, soft long bloom */
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.45),
+    0 0 6px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.9)),
+    0 0 18px rgba(var(--teal-rgb), var(--hero-glow-strong)),
+    0 0 36px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.5));
+  transform: translateZ(0);
 }
 
+/* teal code icon style */
 .code-icon {
-  color: #00bcd4; /* Accent color */
-  font-weight: 600;
+  color: #19d7c9;
+  font-weight: 700;
+  font-size: 1.1em;
+  transform: translateY(-2px);
+  text-shadow:
+    0 0 6px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1.0)),
+    0 0 18px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.6));
 }
 
+/* subtitle */
 .subtitle {
-  font-size: 1.5rem;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
   margin-top: 10px;
+  font-weight: 300;
+  font-size: clamp(1.05rem, 1.6vw, 1.4rem);
+  color: rgba(255,255,255,0.9);
+  text-shadow:
+    0 0 6px rgba(var(--teal-rgb), var(--hero-glow-med)),
+    0 0 12px rgba(var(--teal-rgb), calc(var(--hero-glow-med) * 0.6));
 }
 
+/* thin divider line */
+.hero-divider {
+  margin-top: 28px;
+  margin-bottom: 28px;
+  height: 1px;
+  width: 56%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border-radius: 2px;
+}
+
+/* italic tagline */
 .tagline {
-  font-size: 1.1rem;
-  margin-top: 20px;
+  font-style: italic;
+  color: rgba(255,255,255,0.75);
+  margin-top: 8px;
+  text-shadow:
+    0 0 6px rgba(var(--teal-rgb), var(--hero-glow-subtle));
 }
 
-/* CTA Button (Bottom Left) */
+/* CTA: subtle transparent button / text */
 .cta-button {
   position: absolute;
-  bottom: 40px;
+  bottom: 28px;
   left: 40px;
-  color: #ffffff;
+  z-index: 2;
+  color: rgba(255,255,255,0.95);
   text-decoration: none;
-  font-weight: 400;
-  display: flex;
-  align-items: center;
+  display: inline-flex;
   gap: 10px;
-  transition: color 0.3s ease, transform 0.3s ease;
+  align-items: center;
+  font-weight: 400;
+  transition: transform .16s ease, color .16s ease;
+  padding: 6px 0;
+  border-radius: 4px;
 }
 
 .cta-button:hover {
-  color: #00bcd4;
-  transform: translateY(-5px);
+  transform: translateY(-3px);
+  color: #19d7c9;
 }
 
-.arrow-icon {
-  font-size: 1.2rem;
+/* social icons top-right */
+.social-icons {
+  position: absolute;
+  top: 28px;
+  right: 36px;
+  display: flex;
+  gap: 18px;
+  z-index: 2;
+}
+
+.social-icons a {
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-size: 1.25rem;
+  transition: transform .14s ease, color .14s ease;
+}
+
+.social-icons a:hover { color: #19d7c9; transform: scale(1.12); }
+
+/* hover intensify (desktop only) */
+@media (hover: hover) {
+  .hero-content h1:hover,
+  .hero-content h1:focus {
+    text-shadow:
+      0 1px 0 rgba(0,0,0,0.45),
+      0 0 8px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1.1)),
+      0 0 26px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1.05)),
+      0 0 48px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.6));
+  }
+}
+
+/* responsive adjustments */
+@media (max-width: 880px) {
+  .hero-content { margin-left: 6vw; max-width: 86%; }
+  .hero-content h1 { font-size: clamp(2.2rem, 8vw, 3.6rem); }
+  .hero-divider { width: 80%; }
+}
+
+@media (max-width: 520px) {
+  .hero-container { justify-content: center; padding: 0 6vw; }
+  .hero-content { text-align: center; margin-left: 0; }
+  .cta-button { left: 16px; bottom: 18px; }
+  .social-icons { right: 16px; top: 16px; }
 }

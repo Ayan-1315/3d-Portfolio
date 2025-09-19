@@ -1,17 +1,10 @@
-// src/App.jsx
-import React from 'react';
-import ParticleBackground from './components/ParticleBackground';
-import Hero from './components/Hero';
-import './App.css'; // You might have this file, or index.css
+import React from "react";
+import Hero from "./components/Hero";
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <ParticleBackground />
+    <div className="app-root">
       <Hero />
-      {/* Add other sections of your portfolio below, e.g., <Projects />, <About />, etc. */}
     </div>
   );
 }
-
-export default App;
