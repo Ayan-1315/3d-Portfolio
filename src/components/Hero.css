@@ -1,27 +1,34 @@
 /* src/components/Hero.css
-   Responsive: 8-rule grid + fluid typography + breakpoints
+   Modern, professional hero with subtle accents (clean text).
 */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
 :root{
-  --teal-rgb: 25, 215, 201;
-  --hero-glow-strong: 0.20;
-  --hero-glow-med: 0.12;
-  --hero-glow-subtle: 0.06;
-
-  /* 8-rule grid unit (percentage of viewport width) */
   --grid-unit: 12.5%;
 
-  /* hero placement multipliers (can be adjusted for layout) */
-  --hero-left-m: 1.25;  /* multiply by grid unit -> left offset */
-  --hero-top-m: 2.25;   /* multiply by grid unit -> top offset */
+  --hero-left-m-base: 0.5;
+  --hero-top-m-base: 4.15;
+
+  --content-max-width-base: 720px;
+  --headline-scale-base: 1;
+  --subtitle-scale-base: 1;
+
+  --social-right-m-base: 0.5;
+  --social-top-m-base: 0.5;
+  --social-size-base: 40px;
+
+  --cta-left-m-base: 0.5;
+  --cta-bottom-m-base: 0.5;
+  --cta-gap-base: 10px;
+
+  --teal-rgb: 25, 215, 201;
+  --accent-teal: rgba(25,215,201,1);
+  --hero-glow-strong: 0.14;
+  --hero-glow-med: 0.09;
+  --hero-glow-subtle: 0.5;
 
   --bg-grad-start: #071016;
-  --bg-grad-end: #0b1416;
-
-  /* max widths (to prevent giant lines on massive screens) */
-  --hero-max-width: 640px;
-  --hero-font-scale: 1; /* used for fine tuning on very large screens */
+  --bg-grad-end: #071214;
 }
 
 /* resets */
@@ -36,15 +43,46 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* hero container: uses absolute positioned elements for precise grid placement */
+/* hero container & particles */
 .hero-container {
   position: relative;
   min-height: 100vh;
   height: 100vh;
   overflow: hidden;
+
+  /* subtle base border; helps the outer glow sit correctly */
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.02);
 }
 
-/* particles canvas behind UI */
+/* two soft corner accents (top-left, bottom-right) for depth */
+.hero-container::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  /* Modern subtle corner accents */
+  background:
+    radial-gradient(circle at 8% 12%, rgba(var(--teal-rgb), 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 92% 88%, rgba(var(--teal-rgb), 0.08) 0%, transparent 55%);
+  
+  filter: blur(28px);
+  opacity: 0.8;
+  mix-blend-mode: screen;
+}
+
+.hero-container::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow: inset 0 0 28px rgba(var(--teal-rgb), 0.02);
+}
+
+/* particles layer */
 #tsparticles {
   position: absolute !important;
   inset: 0 !important;
@@ -52,198 +90,332 @@ body {
   height: 100% !important;
   z-index: 1;
   pointer-events: none;
+
+  /* isolation so animations on siblings don't cause reflow / repaints of particles */
+  transform: translateZ(0);
+  contain: paint;
 }
 
-/* unify UI layers */
+/* UI layers */
 .hero-content,
 .social-icons,
 .cta-button { position: absolute; z-index: 2; }
 
-/* ---------- 8-rule placement: hero content ---------- */
-/* Left/top based on grid multipliers (fluid positions) */
+/* breakpoint-derived defaults */
+:root{
+  --hero-left-m-default: calc(var(--hero-left-m-base) * 1);
+  --hero-top-m-default: calc(var(--hero-top-m-base) * 1);
+  --content-max-width-default: var(--content-max-width-base);
+  --headline-scale-default: calc(var(--headline-scale-base) * 1);
+  --subtitle-scale-default: calc(var(--subtitle-scale-base) * 1);
+  --social-right-m-default: calc(var(--social-right-m-base) * 1);
+  --social-top-m-default: calc(var(--social-top-m-base) * 1);
+  --social-size-default: var(--social-size-base);
+  --cta-left-m-default: calc(var(--cta-left-m-base) * 1);
+  --cta-bottom-m-default: calc(var(--cta-bottom-m-base) * 1);
+  --cta-gap-default: var(--cta-gap-base);
+}
+
+/* responsive tweaks */
+@media (min-width: 1600px) {
+  :root{
+    --hero-top-m-default: calc(var(--hero-top-m-base) * 0.98);
+    --content-max-width-default: calc(var(--content-max-width-base) * 1.18);
+    --headline-scale-default: calc(var(--headline-scale-base) * 1.04);
+  }
+}
+@media (max-width: 520px) {
+  :root{
+    --headline-scale-default: calc(var(--headline-scale-base) * 0.86);
+    --subtitle-scale-default: calc(var(--subtitle-scale-base) * 0.98);
+    --hero-top-m-default: calc(var(--hero-top-m-base) * 0.9);
+  }
+}
+
+/* final vars */
+:root{
+  --hero-left: calc(var(--grid-unit) * var(--hero-left-m-default));
+  --hero-top: calc(var(--grid-unit) * var(--hero-top-m-default));
+  --hero-max-width: var(--content-max-width-default);
+  --headline-font-size: calc(clamp(2.6rem, 6.0vw, 5.2rem) * var(--headline-scale-default));
+  --subtitle-font-size: calc(clamp(1rem, 1.6vw, 1.25rem) * var(--subtitle-scale-default));
+  --social-right: calc(var(--grid-unit) * var(--social-right-m-default));
+  --social-top: calc(var(--grid-unit) * var(--social-top-m-default));
+  --social-size: var(--social-size-default);
+  --cta-left: calc(var(--grid-unit) * var(--cta-left-m-default));
+  --cta-bottom: calc(var(--grid-unit) * var(--cta-bottom-m-default));
+  --cta-gap: var(--cta-gap-default);
+}
+
+/* hero-content layout */
 .hero-content {
-  left: calc(var(--grid-unit) * var(--hero-left-m));
-  top: calc(var(--grid-unit) * var(--hero-top-m));
+  left: var(--hero-left);
+  top: var(--hero-top);
   max-width: var(--hero-max-width);
   text-align: left;
   color: #f5f7f7;
-  transform: translateZ(0); /* promote to own layer */
+  transform: translateZ(0);
+  position: absolute;
+  z-index: 2;
+  padding-right: 8vw;
 }
 
-/* social icons placed in top-right grid area */
-.social-icons {
-  right: calc(var(--grid-unit) * 0.75); /* slight offset */
-  top: calc(var(--grid-unit) * 0.5);
-  display: flex;
-  gap: 18px;
-  align-items: center;
-}
+/* --- HERO TYPOGRAPHY (modern clean) --- */
 
-/* social icon box appearance */
-.social-icons a {
-  color: rgba(255,255,255,0.92);
-  font-size: 1.25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: transform .14s ease, color .14s ease, background .14s ease;
-  background: rgba(255,255,255,0.02);
-  padding: 6px;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
-}
-.social-icons a:hover {
-  color: #19d7c9;
-  transform: translateY(-4px) scale(1.05);
-  background: rgba(25,215,201,0.04);
-}
-
-/* hero typography: fluid & accessible */
+/* headline */
 .hero-content h1 {
-  margin: 0 0 10px 0;
-  font-weight: 800;
-  /* responsive headline using clamp; scaled by --hero-font-scale */
-  font-size: calc(clamp(2.4rem, 5.2vw, 5.2rem) * var(--hero-font-scale));
-  line-height: 0.95;
-  letter-spacing: -1px;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  text-shadow:
-    0 1px 0 rgba(0,0,0,0.45),
-    0 0 6px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.9)),
-    0 0 16px rgba(var(--teal-rgb), var(--hero-glow-strong)),
-    0 0 28px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.45));
-}
-
-/* teal code icon */
-.code-icon {
-  color: #19d7c9;
+  margin: 0 0 20px 0;
   font-weight: 700;
-  font-size: 1.05em;
-  transform: translateY(-2px);
-  text-shadow:
-    0 0 6px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 1)),
-    0 0 16px rgba(var(--teal-rgb), calc(var(--hero-glow-strong) * 0.6));
+  font-size: clamp(2.8rem, 6vw, 4.8rem); /* responsive but controlled */
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: #ffffff; /* main white */
+  
+  /* subtle shadow for legibility */
+  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
 }
 
 /* subtitle */
 .subtitle {
-  margin: 0;
-  margin-top: 8px;
-  font-weight: 300;
-  font-size: clamp(1rem, 1.6vw, 1.4rem);
-  color: rgba(255,255,255,0.95);
-  text-shadow:
-    0 0 6px rgba(var(--teal-rgb), var(--hero-glow-med));
-}
-
-/* divider and tagline */
-.hero-divider {
-  margin-top: 22px;
-  margin-bottom: 22px;
-  height: 1px;
-  width: 56%;
-  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-  border-radius: 2px;
-}
-.tagline {
-  margin-top: 8px;
-  font-style: italic;
-  color: rgba(255,255,255,0.75);
-  text-shadow: 0 0 6px rgba(var(--teal-rgb), var(--hero-glow-subtle));
-}
-
-/* CTA (bottom-left) using 8-rule offsets */
-.cta-button {
-  left: calc(var(--grid-unit) * 0.5);
-  bottom: calc(var(--grid-unit) * 0.5);
-  position: absolute;
-  display: inline-flex;
-  gap: 10px;
-  align-items: center;
-  color: rgba(255,255,255,0.95);
-  text-decoration: none;
+  margin: 0 0 14px 0;
   font-weight: 400;
-  padding: 6px 0;
-  transition: transform .16s ease, color .16s ease;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  color: rgba(255,255,255,0.9);
+  line-height: 1.4;
+}
+
+/* divider (thin + minimal) */
+.hero-divider {
+  margin: 22px 0;
+  height: 1px;
+  width: 60%;
+  max-width: 480px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.25), transparent);
+  border-radius: 1px;
+}
+
+/* tagline */
+.tagline {
+  margin: 0;
+  font-weight: 300;
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  color: rgba(255,255,255,0.8);
+  max-width: 620px;
+  line-height: 1.6;
+}
+
+
+/* social */
+.social-icons {
+  right: var(--social-right);
+  top: var(--social-top);
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  position: absolute;
   z-index: 2;
 }
-.cta-button:hover { color: #19d7c9; transform: translateY(-3px); }
-
-/* ---------- adaptive breakpoints ---------- */
-
-/* Large desktops (very wide screens) */
-@media (min-width: 1600px) {
-  :root { --hero-font-scale: 1.05; }
-  :root { --hero-left-m: 1.5; }  /* nudge slightly inward on ultra-wide */
-  .hero-content { max-width: 780px; }
-  .hero-divider { width: 48%; }
+.social-icons a {
+  color: rgba(255,255,255,0.9);
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--social-size);
+  height: var(--social-size);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  background: rgba(255,255,255,0.02);
+  padding: 6px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+.social-icons a:hover {
+  color: var(--accent-teal);
+  background: rgba(25,215,201,0.06);
+  box-shadow: 0 6px 18px rgba(var(--teal-rgb), 0.06);
 }
 
-/* Desktop / laptop */
-@media (min-width: 1200px) and (max-width: 1599px) {
-  :root { --hero-font-scale: 1; }
-  :root { --hero-left-m: 1.4; }
-  .hero-content { max-width: 720px; }
+/* ---------------- CLEAN TEXT (no neon) ------------
+   All decorative neon/stroke/glow rules removed or neutralized.
+   If any element still has .neon-hover class from markup it will behave as normal text.
+*/
+
+/* reset any neon-hover remnants to plain, white text */
+.neon-hover,
+.neon-hover.neon-active {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+  background: none !important;
+  transform: none !important;
 }
 
-/* Tablet landscape and smaller laptops */
-@media (min-width: 881px) and (max-width: 1199px) {
-  :root { --hero-left-m: 1.2; --hero-top-m: 2.0; }
-  .hero-content { max-width: 680px; }
-  .hero-content h1 { font-size: clamp(2.6rem, 6.0vw, 4.2rem); }
+/* remove pseudo spotlight if present */
+.neon-hover::before,
+.neon-hover::after {
+  display: none !important;
+  content: none !important;
 }
 
-/* Tablet portrait and large phones */
-@media (max-width: 880px) {
-  :root { --grid-unit: 12.5%; } /* unchanged but keep explicit */
-  /* move the content slightly lower and more centered on medium screens */
-  .hero-content {
-    left: calc(var(--grid-unit) * 1.0);
-    top: calc(var(--grid-unit) * 2.8);
-    max-width: 86%;
-  }
-  .hero-divider { width: 72%; }
-  .social-icons {
-    right: calc(var(--grid-unit) * 0.5);
-    top: calc(var(--grid-unit) * 0.45);
-    gap: 14px;
-  }
+/* accessibility: focus outlines for keyboard users (subtle) */
+.neon-hover:focus,
+.hero-content h1:focus {
+  outline: 2px solid rgba(255,255,255,0.06);
+  outline-offset: 4px;
+  box-shadow: none;
 }
 
-/* Small phones */
+/* footer spacing tweaks for small viewport */
 @media (max-width: 520px) {
-  /* center content for small screens */
-  .hero-content {
-    left: 50%;
-    top: 14%;
-    transform: translate(-50%, 0);
-    text-align: center;
-    max-width: 92%;
-  }
-  .hero-content h1 {
-    font-size: clamp(1.8rem, 9.5vw, 2.6rem);
-    line-height: 1.02;
-  }
-  .hero-divider { width: 88%; margin: 18px auto; }
-  .social-icons {
-    right: 12px;
-    top: 12px;
-    gap: 12px;
-  }
-  .cta-button { left: 14px; bottom: 12px; }
-  .social-icons a { width: 36px; height: 36px; font-size: 1.05rem; }
+  .hero-content { padding-right: 4vw; left: 6%; top: 6vh; }
+  .hero-divider { width: 92%; margin: 14px auto; }
+  .tagline { max-width: 100%; font-size: 0.95rem; }
 }
 
-/* Very tiny screens (old phones / tiny viewports) */
-@media (max-width: 360px) {
-  .hero-content h1 { font-size: clamp(1.6rem, 10.5vw, 2.2rem); }
-  .subtitle { font-size: 0.95rem; }
-  :root { --hero-glow-strong: 0.12; --hero-glow-med: 0.08; --hero-glow-subtle: 0.04; }
+/* ---------------- Code-icon animation (glow, powering, launch) ---------------- */
+/* ---------- Code icon: visible slow pulse + hold-to-charge + stable layout ---------- */
+
+.code-icon {
+  display: inline-block;
+  position: relative;
+  padding: 0 0.36em;
+  margin: 0;
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  color: var(--accent-teal);
+  font-weight: 700;
+  font-size: 1.05em;
+  line-height: 1;
+  z-index: 3;
+  will-change: transform;
+  overflow: visible;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* keyboard focus only (no mouse-focus box) */
+.code-icon:focus { outline: none; }
+.code-icon:focus-visible {
+  outline: 2px solid rgba(var(--teal-rgb), 0.12);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* --- SLOW VISIBLE PULSE (idle) --- */
+/* slow, clear cycle so users notice it */
+@keyframes iconPulse {
+  0%   { text-shadow: 0 0 0 rgba(var(--teal-rgb), 0.00); }
+  40%  { text-shadow: 0 0 8px rgba(var(--teal-rgb), 0.22); }
+  100% { text-shadow: 0 0 0 rgba(var(--teal-rgb), 0.00); }
+}
+.code-icon {
+  animation: iconPulse 4200ms ease-in-out infinite;
+}
+
+/* --- CHARGING: press & hold ramps emission up (forwards fill) --- */
+@keyframes iconCharge {
+  0% {
+    text-shadow: 0 0 8px rgba(var(--teal-rgb), 0.22);
+    transform: scale(1);
+  }
+  100% {
+    text-shadow: 0 0 28px rgba(var(--teal-rgb), 0.95);
+    transform: scale(1.02);
+  }
+}
+/* while the user holds, add this class from JS to ramp to full charge */
+.code-icon.charging {
+  animation: iconCharge 2200ms linear forwards;
+  /* stop idle pulse while charging */
+  animation-delay: 0s;
+}
+
+/* --- POWERING (short immediate feedback before launch) --- */
+.code-icon.powering {
+  /* a short intense pulse (loop quickly while powering) */
+  animation: iconCharge 520ms ease-in-out infinite;
+}
+
+/* --- LAUNCHED: a different animation during flight; fades after 1.6s --- */
+@keyframes iconPulseLaunch {
+  0% { text-shadow: 0 0 28px rgba(var(--teal-rgb), 0.95); transform: scale(1.02); }
+  80% { text-shadow: 0 0 10px rgba(var(--teal-rgb), 0.45); transform: scale(1); }
+  100% { text-shadow: 0 0 6px rgba(var(--teal-rgb), 0.36); transform: scale(1); }
+}
+.code-icon.launched {
+  animation: iconPulseLaunch 1600ms cubic-bezier(.2,.6,.2,1) forwards;
+}
+
+/* --- glyph layout: brackets absolutely positioned so motion never changes layout --- */
+.code-icon .bracket,
+.code-icon .slash {
+  display: inline-block;
+  transform-origin: center;
+  pointer-events: none;
+  transition: transform 220ms ease, opacity 220ms ease, text-shadow 220ms ease;
+  will-change: transform, opacity, text-shadow;
+}
+
+/* absolute positions keep bracket motion out of flow */
+.code-icon .bracket-left,
+.code-icon .bracket-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.code-icon .bracket-left { left: 0.0em; }
+.code-icon .slash { position: relative; display:inline-block; margin: 0 0.12em; }
+.code-icon .bracket-right { right: -0.08em; }
+
+/* --- POWERING transforms (visual pull) --- */
+.code-icon.powering .bracket-left { transform: translateX(6px) scale(1.02); }
+.code-icon.powering .bracket-right { transform: translateX(-6px) scale(1.02); }
+.code-icon.powering .slash { transform: scale(1.03); }
+
+/* --- LAUNCH: transforms only (no layout impact) --- */
+@keyframes launch-left {
+  0%   { transform: translateX(0) translateY(0) rotate(0deg); opacity:1; }
+  30%  { transform: translateX(-40px) translateY(-110px) rotate(-25deg); opacity:1; }
+  60%  { transform: translateX(-88px) translateY(110px) rotate(145deg); opacity:1; }
+  100% { transform: translateX(-132px) translateY(300px) rotate(210deg); opacity:0; }
+}
+@keyframes launch-right {
+  0%   { transform: translateX(0) translateY(0) rotate(0deg); opacity:1; }
+  30%  { transform: translateX(40px) translateY(-110px) rotate(25deg); opacity:1; }
+  60%  { transform: translateX(88px) translateY(110px) rotate(-145deg); opacity:1; }
+  100% { transform: translateX(132px) translateY(300px) rotate(-210deg); opacity:0; }
+}
+.code-icon.launched .bracket-left { animation: launch-left 1.6s cubic-bezier(.2,.6,.2,1) forwards; }
+.code-icon.launched .bracket-right { animation: launch-right 1.6s cubic-bezier(.2,.6,.2,1) forwards; }
+
+/* slash dims while brackets fly */
+.code-icon.launched .slash { opacity: 0.36; transform: translateY(6px) rotate(6deg); }
+
+/* disable pointer events while animating */
+.code-icon.disabled,
+.code-icon[aria-pressed="true"] {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.98;
+}
+
+/* mobile: shorter bracket travel */
+@media (max-width: 520px) {
+  @keyframes launch-left {
+    0%   { transform: translateX(0) translateY(0) rotate(0deg); opacity:1; }
+    30%  { transform: translateX(-28px) translateY(-80px) rotate(-20deg); opacity:1; }
+    60%  { transform: translateX(-56px) translateY(90px) rotate(120deg); opacity:1; }
+    100% { transform: translateX(-80px) translateY(220px) rotate(180deg); opacity:0; }
+  }
+  @keyframes launch-right {
+    0%   { transform: translateX(0) translateY(0) rotate(0deg); opacity:1; }
+    30%  { transform: translateX(28px) translateY(-80px) rotate(20deg); opacity:1; }
+    60%  { transform: translateX(56px) translateY(90px) rotate(-120deg); opacity:1; }
+    100% { transform: translateX(80px) translateY(220px) rotate(-180deg); opacity:0; }
+  }
 }

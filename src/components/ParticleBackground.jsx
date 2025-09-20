@@ -4,7 +4,7 @@ import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadFull } from "tsparticles";
 
 const ParticleBackground = () => {
-  const [init, setInit] = useState(false);
+  const [init, setInit] = useState(true);
   const [particleCount, setParticleCount] = useState(140);
 
   // Init tsparticles engine once
@@ -82,7 +82,6 @@ const ParticleBackground = () => {
     },
   };
 
-  if (!init) return null;
 
   return (
     <Particles
