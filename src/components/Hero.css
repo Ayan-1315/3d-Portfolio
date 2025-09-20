@@ -84,17 +84,14 @@ body {
 
 /* particles layer */
 #tsparticles {
-  position: absolute !important;
-  inset: 0 !important;
+  position: fixed !important;   /* instead of absolute */
+  top: 0; left: 0; right: 0; bottom: 0;
   width: 100% !important;
   height: 100% !important;
-  z-index: 1;
+  z-index: 1;                   /* behind everything */
   pointer-events: none;
-
-  /* isolation so animations on siblings don't cause reflow / repaints of particles */
-  transform: translateZ(0);
-  contain: paint;
 }
+
 
 /* UI layers */
 .hero-content,
@@ -329,7 +326,7 @@ body {
 }
 /* while the user holds, add this class from JS to ramp to full charge */
 .code-icon.charging {
-  animation: iconCharge 2200ms linear forwards;
+  animation: iconPulse 4200ms ease-in-out infinite, iconCharge 2200ms linear forwards;
   /* stop idle pulse while charging */
   animation-delay: 0s;
 }
@@ -337,7 +334,7 @@ body {
 /* --- POWERING (short immediate feedback before launch) --- */
 .code-icon.powering {
   /* a short intense pulse (loop quickly while powering) */
-  animation: iconCharge 520ms ease-in-out infinite;
+  animation: iconPulse 4200ms ease-in-out infinite, iconCharge 520ms ease-in-out infinite;
 }
 
 /* --- LAUNCHED: a different animation during flight; fades after 1.6s --- */
