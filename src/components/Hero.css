@@ -43,45 +43,25 @@ body {
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.02);
-}
-.hero-container::before {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  
-  /* UPDATED: Layered gradients for a smoother falloff */
-  background:
-    /* Top-left outer glow (large, soft) */
-    radial-gradient(circle at 8% 12%, rgba(var(--teal-rgb), 0.07) 0%, transparent 50%),
-    /* Top-left inner glow (small, bright hotspot) */
-    radial-gradient(circle at 8% 12%, rgba(var(--teal-rgb), 0.10) 0%, transparent 25%),
-    /* Bottom-right outer glow (large, soft) */
-    radial-gradient(circle at 92% 88%, rgba(var(--teal-rgb), 0.05) 0%, transparent 55%),
-    /* Bottom-right inner glow (small, bright hotspot) */
-    radial-gradient(circle at 92% 88%, rgba(var(--teal-rgb), 0.08) 0%, transparent 28%);
 
-  filter: blur(35px); /* INCREASED: A stronger blur also helps smooth the effect */
-  opacity: 0.8;
-  mix-blend-mode: screen;
+  /* --- UPDATED: Add a transparent-to-dark gradient over the image --- */
+  background-image: linear-gradient(
+                      rgba(0, 0, 0, 0.71), /* Adjust this opacity for more or less darkness */
+                      rgba(0, 0, 0, 0.796)  /* Adjust this opacity for more or less darkness */
+                    ), 
+                    url('../assets/noise.png'); /* Your image URL here */
+  
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
 }
-.hero-container::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  box-shadow: inset 0 0 28px rgba(var(--teal-rgb), 0.02);
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><filter id="n" x="0" y="0"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
-  opacity: 0.00; /* Controls the noise visibility - keep it very low */
-}
+
 #tsparticles {
   position: fixed !important;
   top: 0; left: 0; right: 0; bottom: 0;
   width: 100% !important;
   height: 100% !important;
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
 }
 
@@ -206,7 +186,7 @@ body {
   height: 1px;
   width: 60%;
   max-width: 480px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.25), transparent);
+  background: linear-gradient(90deg, rgba(40, 197, 208, 0.384), transparent);
   border-radius: 1px;
 }
 .tagline {
@@ -247,12 +227,9 @@ body {
   box-shadow: 0 6px 18px rgba(var(--teal-rgb), 0.06);
 }
 
-/* --- THE REST OF YOUR CSS (ANIMATIONS, ETC.) REMAINS THE SAME --- */
-/* Your .neon-hover styles and all .code-icon animations go here */
-/* (No changes were needed for the animation keyframes) */
 
+/* .neon-hover styles and all .code-icon animations go here */
 /* ---------------- Code-icon animation (glow, powering, launch) ---------------- */
-/* ---------- Code icon: visible slow pulse + hold-to-charge + stable layout ---------- */
 
 /* --- CODE ICON BASE STYLES --- */
 .code-icon {

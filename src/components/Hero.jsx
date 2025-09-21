@@ -94,7 +94,7 @@ export default function Hero() {
       </nav>
       <div className="hero-content">
         <h1>
-          Your Name
+          Ayan Sen
           <button
             className={`code-icon ${isAnimating ? "disabled" : ""} ${
               charging ? "charging" : ""
