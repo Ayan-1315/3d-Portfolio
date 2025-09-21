@@ -1,34 +1,88 @@
-import React, { useEffect, useRef, useState } from "react";
+// src/components/Scene.jsx
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import ParticleBackground from "./ParticleBackground";
-import "./Hero.css";
+import ParticleInfo from './ParticleInfo';
+import "./Main.css";
 import { FaInstagram, FaGithub, FaLinkedin } from "react-icons/fa";
 
-export default function Hero() {
+export default function Scene() {
   const heroRef = useRef(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [powering, setPowering] = useState(false);
   const [launched, setLaunched] = useState(false);
   const [charging, setCharging] = useState(false);
   const [launchPower, setLaunchPower] = useState('');
+  const [currentParticleCount, setCurrentParticleCount] = useState(0);
+  const [particlesInitialized, setParticlesInitialized] = useState(false);
+
+  const handleParticleCountChange = useCallback((count) => {
+    setCurrentParticleCount(count);
+  }, []);
+  
+  const handleParticlesInit = useCallback(() => {
+    setParticlesInitialized(true);
+  }, []);
+
+  // WARNING popup state & threshold
+  const [showWarning, setShowWarning] = useState(false);
+  const warningTimerRef = useRef(null);
+  const PARTICLE_WARNING_THRESHOLD = 130; // change this threshold as you like
+  const WARNING_AUTO_DISMISS_MS = 5000;
+
+  // watch particle count and show popup when threshold exceeded
+  useEffect(() => {
+    if (currentParticleCount > PARTICLE_WARNING_THRESHOLD) {
+      // don't retrigger if already shown
+      if (!showWarning) {
+        setShowWarning(true);
+        if (warningTimerRef.current) {
+          clearTimeout(warningTimerRef.current);
+        }
+        warningTimerRef.current = setTimeout(() => {
+          setShowWarning(false);
+          warningTimerRef.current = null;
+        }, WARNING_AUTO_DISMISS_MS);
+      }
+    }
+    // if count drops below threshold, hide the warning immediately
+    if (currentParticleCount <= PARTICLE_WARNING_THRESHOLD && showWarning) {
+      setShowWarning(false);
+      if (warningTimerRef.current) {
+        clearTimeout(warningTimerRef.current);
+        warningTimerRef.current = null;
+      }
+    }
+    // cleanup on unmount
+    return () => {
+      if (warningTimerRef.current) {
+        clearTimeout(warningTimerRef.current);
+        warningTimerRef.current = null;
+      }
+    };
+  }, [currentParticleCount, showWarning]);
+
+  const closeWarning = () => {
+    setShowWarning(false);
+    if (warningTimerRef.current) {
+      clearTimeout(warningTimerRef.current);
+      warningTimerRef.current = null;
+    }
+  };
 
   const chargeTimerRef = useRef(null);
   const wasChargedRef = useRef(false);
-  
-  // 1. Add a ref to store the press start time
   const pressStartTime = useRef(null);
 
   const CHARGE_TO_FULL_MS = 2200;
   const SHORT_PULL_MS = 180;
-  const MEDIUM_POWER_THRESHOLD_MS = 500; // Hold for 0.5s for medium power
+  const MEDIUM_POWER_THRESHOLD_MS = 500;
 
   const startCharge = (e) => {
     if (isAnimating) return;
     e && e.preventDefault && e.preventDefault();
-    
-    pressStartTime.current = Date.now(); // Record when the press starts
+    pressStartTime.current = Date.now();
     wasChargedRef.current = false;
     setCharging(true);
-    
     chargeTimerRef.current = setTimeout(() => {
       wasChargedRef.current = true;
     }, CHARGE_TO_FULL_MS);
@@ -40,32 +94,24 @@ export default function Hero() {
       clearTimeout(chargeTimerRef.current);
       chargeTimerRef.current = null;
     }
-
-    // 2. Calculate how long the button was held
     const holdDuration = Date.now() - pressStartTime.current;
-
     setIsAnimating(true);
     setCharging(false);
     setPowering(true);
-
-    // 3. Determine power level and duration based on hold time
     let power = 'launch-low';
-    let cleanupDuration = 1200; // Duration for low power animation
-
+    let cleanupDuration = 1200;
     if (wasChargedRef.current) {
       power = 'launch-high';
-      cleanupDuration = 2000; // Duration for high power animation
+      cleanupDuration = 2000;
     } else if (holdDuration > MEDIUM_POWER_THRESHOLD_MS) {
       power = 'launch-medium';
-      cleanupDuration = 1600; // Duration for medium power animation
+      cleanupDuration = 1600;
     }
-
     setTimeout(() => {
       setLaunchPower(power);
       setLaunched(true);
       setPowering(false);
     }, SHORT_PULL_MS);
-
     setTimeout(() => {
       setLaunched(false);
       setPowering(false);
@@ -82,11 +128,36 @@ export default function Hero() {
     setCharging(false);
   };
 
-  useEffect(() => {}, []);
-
   return (
     <section className="hero-container" ref={heroRef}>
-      <ParticleBackground />
+      <ParticleBackground 
+        onCountChange={handleParticleCountChange} 
+        onInitialized={handleParticlesInit} 
+      />
+      
+      <ParticleInfo 
+        particleCount={currentParticleCount} 
+        // keep it visible always; we'll still pass init state if needed elsewhere
+        isInitialized={particlesInitialized}
+      />
+
+      {/* Warning popup --- appears when particle count is over threshold */}
+      {showWarning && (
+        <div className="particle-warning-overlay" role="alert" aria-live="assertive">
+          <div className="particle-warning-card">
+            <div className="particle-warning-title">Particle Limit Exceeded</div>
+            <div className="particle-warning-message">
+              Particle count is {currentParticleCount}, which exceeds the safe threshold ({PARTICLE_WARNING_THRESHOLD}).
+            </div>
+            <div className="particle-warning-actions">
+              <button onClick={closeWarning} className="particle-warning-close" aria-label="Close warning">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className="social-icons">
         <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram"><FaInstagram /></a>
         <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub"><FaGithub /></a>

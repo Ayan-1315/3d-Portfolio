@@ -1,0 +1,71 @@
+/* Warning popup styles (append to ParticleInfo.css or put into a separate css file) */
+
+/* overlay */
+.particle-warning-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200; /* above particle info */
+  pointer-events: none; /* allow clicks through except on the card */
+}
+
+/* card */
+.particle-warning-card {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 420px;
+  background: rgba(10, 18, 20, 0.95);
+  color: #fff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.03);
+  font-family: 'Poppins', sans-serif;
+  text-align: left;
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+.particle-warning-title {
+  font-weight: 600;
+  font-size: 1.02rem;
+  margin-bottom: 6px;
+  color: #ffd28a;
+}
+
+.particle-warning-message {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 10px;
+}
+
+/* actions */
+.particle-warning-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.particle-warning-close {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 120ms ease, transform 80ms ease;
+}
+
+.particle-warning-close:hover {
+  background: rgba(255,255,255,0.03);
+  transform: translateY(-1px);
+}
+
+/* ensure particle-info remains above most content but below the warning overlay */
+.particle-info-container {
+  z-index: 110;
+}
+
+/* if you want to push the particle-info above warning remove previous z-index lines; current setup keeps warning on top */

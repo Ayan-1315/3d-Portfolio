@@ -1,21 +1,24 @@
 // src/components/ParticleBackground.jsx
-import React, { useEffect, useState, useMemo, memo } from "react"; // 1. Import 'memo'
+import React, { useEffect, useState, useMemo, memo } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadFull } from "tsparticles";
 
-const ParticleBackground = () => {
-  // 2. Start with init as false
+const ParticleBackground = ({ onCountChange, onInitialized }) => {
   const [init, setInit] = useState(false);
   const [particleCount, setParticleCount] = useState(140);
 
-  // Init tsparticles engine once
   useEffect(() => {
     initParticlesEngine(async (engine) => {
       await loadFull(engine);
-    }).then(() => setInit(true));
-  }, []);
+    }).then(() => {
+      setInit(true);
+      if (onInitialized) {
+        onInitialized();
+      }
+    });
+  }, [onInitialized]);
 
-  // Responsive particle density
+  // This effect calculates the target count and sets it in state
   useEffect(() => {
     const updateCount = () => {
       const w = window.innerWidth;
@@ -29,62 +32,37 @@ const ParticleBackground = () => {
     return () => window.removeEventListener("resize", updateCount);
   }, []);
 
+  // This effect reports the target count to the parent whenever it changes
+  useEffect(() => {
+    if (onCountChange) {
+      onCountChange(particleCount);
+    }
+  }, [particleCount, onCountChange]);
+
   const options = useMemo(() => ({
-      // Your options object is perfect, no changes needed here.
       fullScreen: { enable: false },
       background: { color: "transparent" },
       detectRetina: true,
       fpsLimit: 60,
       particles: {
         number: {
-          value: particleCount,
+          value: particleCount, // Use the state variable
           density: { enable: true, area: 900 },
         },
         color: { value: ["#00fff7", "#19d7c9", "#00e6b8"] },
         shape: { type: "circle" },
-        opacity: {
-          value: 0.9,
-          random: { enable: true, minimumValue: 0.35 },
-          animation: { enable: true, speed: 1, minimumValue: 0.25, sync: false },
-        },
-        size: {
-          value: { min: 1, max: 3 },
-          animation: { enable: true, speed: 2, minimumValue: 0.5, sync: false },
-        },
-        links: {
-          enable: true,
-          distance: 140,
-          color: "#19d7c9",
-          opacity: 0.22,
-          width: 1.2,
-          triangles: {
-            enable: true,
-            color: { value: "#0b3b36" },
-            opacity: 0.05,
-            stroke: { width: 0.6, color: "#0e4b44" },
-          },
-        },
-        move: {
-          enable: true,
-          speed: 0.6,
-          random: true,
-          outModes: { default: "bounce" },
-        },
+        opacity: { value: 0.9, random: { enable: true, minimumValue: 0.35 }, animation: { enable: true, speed: 1, minimumValue: 0.25, sync: false }, },
+        size: { value: { min: 1, max: 3 }, animation: { enable: true, speed: 2, minimumValue: 0.5, sync: false }, },
+        links: { enable: true, distance: 140, color: "#19d7c9", opacity: 0.22, width: 1.2, triangles: { enable: true, color: { value: "#0b3b36" }, opacity: 0.05, stroke: { width: 0.6, color: "#0e4b44" }, }, },
+        move: { enable: true, speed: 0.6, random: true, outModes: { default: "bounce" }, },
       },
       interactivity: {
         detectsOn: "canvas",
-        events: {
-          onHover: { enable: true, mode: "repulse" },
-          onClick: { enable: true, mode: "push" },
-        },
-        modes: {
-          repulse: { distance: 120, duration: 0.4 },
-          push: { quantity: 3 },
-        },
+        events: { onHover: { enable: true, mode: "repulse" }, onClick: { enable: true, mode: "push" }, },
+        modes: { repulse: { distance: 120, duration: 0.4 }, push: { quantity: 3 }, },
       },
   }), [particleCount]);
 
-  // 3. Conditionally render Particles only after the engine is initialized
   if (init) {
     return (
       <Particles
@@ -94,8 +72,7 @@ const ParticleBackground = () => {
     );
   }
 
-  return <></>; // Return nothing while loading
+  return <></>;
 };
 
-// 4. Export with 'memo' not 'useMemo'
 export default memo(ParticleBackground);

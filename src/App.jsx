@@ -1,10 +1,10 @@
 import React from "react";
-import Hero from "./components/Hero";
+import Scene from "./components/Scene";
 
 export default function App() {
   return (
     <div className="app-root">
-      <Hero />
+      <Scene />
     </div>
   );
 }
