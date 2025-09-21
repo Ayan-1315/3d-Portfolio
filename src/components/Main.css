@@ -26,9 +26,6 @@
      The React code reads --particle-threshold-default at runtime.
      Change these values to adjust when the warning triggers.
   */
-  --particle-threshold-default: 140; /* desktop/large default */
-  --particle-threshold-tablet: 120;
-  --particle-threshold-mobile: 60;
 }
 
 /* near top :root */
@@ -456,4 +453,87 @@ body {
   @keyframes launch-right-high {
     100% { transform: translateY(-50%) translateX(200px) translateY(300px) rotate(-400deg) scale(0.5); opacity: 0; }
   }
+}
+
+/* FPS warning (themed) */
+.fps-warning-overlay {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fps-warning-card {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 260px;
+  max-width: 360px;
+  background: linear-gradient(180deg, rgba(6,10,12,0.76), rgba(8,12,14,0.86));
+  border-radius: 12px;
+  padding: 12px 16px;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(25,215,201,0.08);
+  box-shadow: 0 10px 30px rgba(2,10,8,0.6), 0 0 30px rgba(var(--teal-rgb), 0.06);
+  font-family: 'Poppins', sans-serif;
+  color: rgba(255,255,255,0.92);
+  transform-origin: left bottom;
+}
+
+/* title */
+.fps-warning-title {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--accent-teal, #19d7c9);
+  text-shadow: 0 2px 10px rgba(var(--teal-rgb), 0.12);
+}
+
+/* message */
+.fps-warning-message {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.3;
+}
+
+/* actions */
+.fps-warning-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* buttons */
+.fps-warning-close {
+  pointer-events: auto;
+  background: rgba(var(--teal-rgb), 0.12);
+  border: 1px solid rgba(var(--teal-rgb), 0.14);
+  color: #e9fff8;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
+}
+.fps-warning-close:hover {
+  transform: translateY(-2px);
+  background: rgba(var(--teal-rgb), 0.18);
+}
+
+/* refresh button style variation (make it slightly brighter) */
+.fps-warning-actions .fps-warning-close:first-child {
+  background: linear-gradient(90deg, rgba(var(--teal-rgb),0.18), rgba(var(--teal-rgb),0.25));
+  border-color: rgba(var(--teal-rgb),0.22);
+  color: #001815;
+}
+
+/* responsive */
+@media (max-width: 520px) {
+  .fps-warning-overlay { left: 50%; transform: translateX(-50%); bottom: 18px; }
+  .fps-warning-card { min-width: 220px; padding: 10px 12px; }
 }

@@ -1,9 +1,7 @@
 // src/components/Scene.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ParticleBackground from "./ParticleBackground";
-import ParticleInfo from "./ParticleInfo";
-import "./Main.css"; // Main.css / Hero.css (you provided)
-import "./ParticleInfo.css";
+import "./Main.css";
 import { FaInstagram, FaGithub, FaLinkedin } from "react-icons/fa";
 
 export default function Scene() {
@@ -13,151 +11,158 @@ export default function Scene() {
   const [launched, setLaunched] = useState(false);
   const [charging, setCharging] = useState(false);
   const [launchPower, setLaunchPower] = useState("");
-  const [currentParticleCount, setCurrentParticleCount] = useState(0);
   const [particlesInitialized, setParticlesInitialized] = useState(false);
 
-  // WARNING popup state & threshold
+  // FPS tracking
+  const [currentFPS, setCurrentFPS] = useState(60);
+
+  // warning states & refs
   const [showWarning, setShowWarning] = useState(false);
-  const warningTimerRef = useRef(null);
-  const [particleThreshold, setParticleThreshold] = useState(140); // fallback
-  const WARNING_AUTO_DISMISS_MS = 5000;
-  const PUSH_QUANTITY = 3;
+  const [warningType, setWarningType] = useState(null); // 'brief' | 'persistent' | null
 
-  // HYSTERESIS: do not show again until increased by this many from last shown
-  const HYSTERESIS_COUNT = 30;
-  const lastShownRef = useRef(null); // remembers last particle count when we showed warning
+  const briefHideTimerRef = useRef(null);
+  const briefCooldownRef = useRef(null); // 60s cooldown after dismissing brief
+  const rafRef = useRef(null);
 
-  const handleParticleCountChange = useCallback((count) => {
-    const parsed = Number(count) || 0;
-    // debug: log raw and parsed values
-    // eslint-disable-next-line no-console
-    console.debug("[Scene] handleParticleCountChange ->", {
-      raw: count,
-      parsed,
-    });
-    setCurrentParticleCount(parsed);
-  }, []);
+  // knobs
+  const FPS_BRIEF_MIN = 11;
+  const FPS_BRIEF_MAX = 15;
+  const FPS_PERSISTENT_MAX = 10;
+  const BRIEF_VISIBLE_MS = 5000; // show once for 5s when fps in 11..15
+  const BRIEF_COOLDOWN_MS = 60000; // 60s cooldown after user dismisses brief
 
   const handleParticlesInit = useCallback(() => {
     setParticlesInitialized(true);
   }, []);
 
-  // Read threshold from CSS var on mount & resize (uses --particle-warning)
+  // measure FPS (requestAnimationFrame)
   useEffect(() => {
-    const readThresholdFromCSS = () => {
-      try {
-        const raw = getComputedStyle(document.documentElement).getPropertyValue('--particle-warning') || '';
-        const parsed = parseInt(raw.trim(), 10);
-        if (!Number.isNaN(parsed) && parsed > 0) return parsed;
-      } catch (e) {}
-      return 140; // fallback
+    let last = performance.now();
+    let frames = 0;
+
+    const loop = (now) => {
+      frames++;
+      const delta = now - last;
+      if (delta >= 1000) {
+        const fps = Math.max(0, Math.round((frames * 1000) / delta));
+        setCurrentFPS(fps);
+        frames = 0;
+        last = now;
+      }
+      rafRef.current = requestAnimationFrame(loop);
     };
 
-    const setFromCSS = () => setParticleThreshold(readThresholdFromCSS());
-    setFromCSS();
-
-    const onResize = () => setFromCSS();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
   }, []);
 
-  // The watcher with hysteresis: only show when:
-  // - current >= particleThreshold
-  // AND
-  // - lastShownRef.current === null OR current >= lastShownRef.current + HYSTERESIS_COUNT
+  // main watcher: decide what kind of warning to show
   useEffect(() => {
-    if (currentParticleCount >= particleThreshold) {
-      const shouldShow =
-        lastShownRef.current === null ||
-        currentParticleCount >= (lastShownRef.current + HYSTERESIS_COUNT);
+    const clearBriefHide = () => {
+      if (briefHideTimerRef.current) {
+        clearTimeout(briefHideTimerRef.current);
+        briefHideTimerRef.current = null;
+      }
+    };
 
-      if (shouldShow && !showWarning) {
+    // Priority:
+    // 1) fps <= 10 -> persistent warning with Reload button
+    // 2) fps in 11..15 -> brief one-time 5s warning (but respects cooldown if user dismissed)
+    // 3) fps > 15 -> no warning
+
+    if (currentFPS <= FPS_PERSISTENT_MAX) {
+      // show persistent if not already
+      clearBriefHide();
+      if (warningType !== "persistent" || !showWarning) {
+        setWarningType("persistent");
         setShowWarning(true);
-        lastShownRef.current = currentParticleCount; // remember where we showed it
-        if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-
-        warningTimerRef.current = setTimeout(() => {
-          setShowWarning(false);
-          warningTimerRef.current = null;
-        }, WARNING_AUTO_DISMISS_MS);
       }
-    } else {
-      // If count falls sufficiently below threshold you might want to reset lastShownRef.
-      // Optionally reset so user can trigger warning again after dropping low then rising back.
-      // Example: if it drops below threshold - HYSTERESIS, reset:
-      if (lastShownRef.current !== null && currentParticleCount <= (particleThreshold - HYSTERESIS_COUNT)) {
-        lastShownRef.current = null;
-      }
-
-      if (showWarning) {
-        setShowWarning(false);
-        if (warningTimerRef.current) {
-          clearTimeout(warningTimerRef.current);
-          warningTimerRef.current = null;
-        }
-      }
+      return;
     }
-  }, [currentParticleCount, particleThreshold, showWarning]);
 
-  // Attach a single pointerdown listener to the tsparticles canvas so clicks increment the React counter.
-  // This is intentionally minimal and purely additive — it doesn't alter the particles themselves.
-  useEffect(() => {
-    let canvasEl = null;
+    // fps > 10 here
+    // If we were showing persistent, clear it now
+    if (warningType === "persistent") {
+      setWarningType(null);
+      setShowWarning(false);
+    }
 
-    const attachListener = () => {
-      // locate the canvas generated by tsparticles
-      const canvas = document.querySelector("#tsparticles canvas");
-      if (!canvas || canvas === canvasEl) return;
-
-      // remove previous if present
-      if (canvasEl && canvasEl.__ps_inc) {
-        canvasEl.removeEventListener("pointerdown", canvasEl.__ps_inc);
-        delete canvasEl.__ps_inc;
+    // if fps in brief range
+    if (currentFPS >= FPS_BRIEF_MIN && currentFPS <= FPS_BRIEF_MAX) {
+      // if currently in cooldown from a user dismiss, do nothing
+      if (briefCooldownRef.current) {
+        return;
       }
-
-      const onPointerDown = (ev) => {
-        // increment displayed count by push quantity
-        setCurrentParticleCount((prev) => Number(prev || 0) + PUSH_QUANTITY);
-      };
-
-      canvas.addEventListener("pointerdown", onPointerDown);
-      // store handler so we can remove later
-      canvas.__ps_inc = onPointerDown;
-      canvasEl = canvas;
-    };
-
-    // attach immediately if canvas already in DOM
-    attachListener();
-
-    // If the canvas is mounted later (remounts when particleCount key changes),
-    // watch for DOM additions and reattach automatically.
-    const mo = new MutationObserver(() => attachListener());
-    mo.observe(document.body, { childList: true, subtree: true });
-
-    // Also re-run attach on window resize (useful if canvas is recreated)
-    const onResize = () => attachListener();
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      // cleanup
-      if (canvasEl && canvasEl.__ps_inc) {
-        canvasEl.removeEventListener("pointerdown", canvasEl.__ps_inc);
-        delete canvasEl.__ps_inc;
+      // otherwise show brief if not already shown
+      if (warningType !== "brief") {
+        setWarningType("brief");
+        setShowWarning(true);
+        // auto-hide after BRIEF_VISIBLE_MS
+        clearBriefHide();
+        briefHideTimerRef.current = setTimeout(() => {
+          setShowWarning(false);
+          setWarningType(null);
+          briefHideTimerRef.current = null;
+        }, BRIEF_VISIBLE_MS);
       }
-      mo.disconnect();
-      window.removeEventListener("resize", onResize);
-    };
-  }, []); // run once
+      return;
+    }
 
-  const closeWarning = () => {
+    // healthy FPS (> BRIEF_MAX)
+    // clear any brief timers/cooldowns and hide
+    clearBriefHide();
+    if (briefCooldownRef.current) {
+      clearTimeout(briefCooldownRef.current);
+      briefCooldownRef.current = null;
+    }
+    if (showWarning) setShowWarning(false);
+    if (warningType) setWarningType(null);
+    return;
+  }, [currentFPS, showWarning, warningType]);
+
+  // user dismissed the brief warning: start 60s cooldown
+  const onDismissBrief = () => {
+    // hide brief immediately
     setShowWarning(false);
-    if (warningTimerRef.current) {
-      clearTimeout(warningTimerRef.current);
-      warningTimerRef.current = null;
+    setWarningType(null);
+
+    // clear any existing cooldown timer
+    if (briefCooldownRef.current) {
+      clearTimeout(briefCooldownRef.current);
+      briefCooldownRef.current = null;
+    }
+
+    // start cooldown
+    briefCooldownRef.current = setTimeout(() => {
+      briefCooldownRef.current = null;
+      // after cooldown, if FPS still in brief range, effect will show it again
+    }, BRIEF_COOLDOWN_MS);
+  };
+
+  // persistent reload action (user presses Reload)
+  const onReloadNow = () => {
+    try {
+      window.location.reload();
+    } catch (e) {
+      // fallback: hide warning
+      setShowWarning(false);
+      setWarningType(null);
     }
   };
 
-  // charging / launch logic (unchanged from your original)
+  // cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (briefHideTimerRef.current) clearTimeout(briefHideTimerRef.current);
+      if (briefCooldownRef.current) clearTimeout(briefCooldownRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  // charging / launch logic (unchanged)
   const chargeTimerRef = useRef(null);
   const wasChargedRef = useRef(false);
   const pressStartTime = useRef(null);
@@ -217,82 +222,65 @@ export default function Scene() {
     setCharging(false);
   };
 
-  return (
-    <section className="hero-container" ref={heroRef}>
-      <ParticleBackground
-        onCountChange={handleParticleCountChange}
-        onInitialized={handleParticlesInit}
-      />
+  // Render popup content depending on warningType
+  const renderWarning = () => {
+    if (!showWarning || !warningType) return null;
 
-      <ParticleInfo
-        particleCount={currentParticleCount}
-        isInitialized={particlesInitialized}
-      />
-
-      {/* Warning popup --- appears when particle count is over threshold */}
-      {showWarning && (
-        <div
-          className="particle-warning-overlay"
-          role="alert"
-          aria-live="assertive"
-        >
-          <div className="particle-warning-card">
-            <div className="particle-warning-title">
-              Particle Limit Exceeded
-            </div>
-            <div className="particle-warning-message">
-              Particle count is <strong>{currentParticleCount}</strong>, which
-              exceeds the safe threshold (<strong>{particleThreshold}</strong>).
-            </div>
-            <div className="particle-warning-actions">
-              <button
-                onClick={closeWarning}
-                className="particle-warning-close"
-                aria-label="Close warning"
-              >
-                Dismiss
-              </button>
-            </div>
+    if (warningType === "brief") {
+      return (
+        <div className="fps-warning-card">
+          <div className="fps-warning-title">Performance Notice</div>
+          <div className="fps-warning-message">
+            Frame rate is <strong>{currentFPS} FPS</strong>. Rendering may be a bit slow.
+          </div>
+          <div className="fps-warning-actions">
+            <button className="fps-warning-close" onClick={onDismissBrief}>
+              Dismiss
+            </button>
           </div>
         </div>
-      )}
+      );
+    }
+
+    if (warningType === "persistent") {
+      return (
+        <div className="fps-warning-card">
+          <div className="fps-warning-title">Performance Warning</div>
+          <div className="fps-warning-message">
+            Frame rate is <strong>{currentFPS} FPS</strong>. This may cause noticeable lag.
+          </div>
+          <div className="fps-warning-actions">
+            <button className="fps-warning-close" onClick={onReloadNow}>
+              Reload
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <section className="hero-container" ref={heroRef}>
+      <ParticleBackground onInitialized={handleParticlesInit} />
+
+      {/* FPS warning area (positioned via CSS) */}
+      <div className="fps-warning-overlay" role="alert" aria-live="assertive">
+        {renderWarning()}
+      </div>
 
       <nav className="social-icons">
-        <a
-          href="https://instagram.com"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Instagram"
-        >
-          <FaInstagram />
-        </a>
-        <a
-          href="https://github.com"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
-        >
-          <FaGithub />
-        </a>
-        <a
-          href="https://linkedin.com"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="LinkedIn"
-        >
-          <FaLinkedin />
-        </a>
+        <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram"><FaInstagram /></a>
+        <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub"><FaGithub /></a>
+        <a href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin /></a>
       </nav>
 
       <div className="hero-content">
         <h1>
           Ayan Sen
           <button
-            className={`code-icon ${isAnimating ? "disabled" : ""} ${
-              charging ? "charging" : ""
-            } ${powering ? "powering" : ""} ${
-              launched ? "launched" : ""
-            } ${launchPower}`}
+            className={`code-icon ${isAnimating ? "disabled" : ""} ${charging ? "charging" : ""} ${powering ? "powering" : ""} ${launched ? "launched" : ""} ${launchPower}`}
             onMouseDown={startCharge}
             onMouseUp={releaseAndLaunch}
             onMouseLeave={cancelCharge}
@@ -310,9 +298,7 @@ export default function Scene() {
         </h1>
         <p className="subtitle">Software Developer</p>
         <div className="hero-divider" />
-        <p className="tagline">
-          Passionate about building innovative solutions.
-        </p>
+        <p className="tagline">Passionate about building innovative solutions.</p>
       </div>
     </section>
   );
