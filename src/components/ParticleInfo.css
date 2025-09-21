@@ -1,4 +1,57 @@
-/* Warning popup styles (append to ParticleInfo.css or put into a separate css file) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+.particle-info-container {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  z-index: 110; /* sits above particles but below overlay */
+  background-color: rgba(12, 26, 31, 0.75);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-family: 'Poppins', sans-serif;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
+}
+
+.particle-info-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.particle-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.particle-count {
+  font-weight: 600;
+  color: #19d7c9; /* Teal accent */
+  font-size: 1rem;
+}
+
+/* --- Responsive Scaling --- */
+@media (max-width: 520px) {
+  .particle-info-container {
+    left: 50%;
+    transform: translateX(-50%) translateY(15px);
+    bottom: 20px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+  .particle-info-container.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ================= WARNING OVERLAY (kept here so single import is enough) ================= */
 
 /* overlay */
 .particle-warning-overlay {
@@ -7,7 +60,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200; /* above particle info */
+  z-index: 200; /* above everything */
   pointer-events: none; /* allow clicks through except on the card */
 }
 
@@ -62,10 +115,3 @@
   background: rgba(255,255,255,0.03);
   transform: translateY(-1px);
 }
-
-/* ensure particle-info remains above most content but below the warning overlay */
-.particle-info-container {
-  z-index: 110;
-}
-
-/* if you want to push the particle-info above warning remove previous z-index lines; current setup keeps warning on top */

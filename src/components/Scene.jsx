@@ -2,7 +2,8 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ParticleBackground from "./ParticleBackground";
 import ParticleInfo from './ParticleInfo';
-import "./Main.css";
+import "./Main.css"; // Main.css / Hero.css (you provided)
+import "./ParticleInfo.css";
 import { FaInstagram, FaGithub, FaLinkedin } from "react-icons/fa";
 
 export default function Scene() {
@@ -15,6 +16,12 @@ export default function Scene() {
   const [currentParticleCount, setCurrentParticleCount] = useState(0);
   const [particlesInitialized, setParticlesInitialized] = useState(false);
 
+  // WARNING popup state & threshold
+  const [showWarning, setShowWarning] = useState(false);
+  const warningTimerRef = useRef(null);
+  const [particleThreshold, setParticleThreshold] = useState(140); // fallback
+  const WARNING_AUTO_DISMISS_MS = 5000;
+
   const handleParticleCountChange = useCallback((count) => {
     setCurrentParticleCount(count);
   }, []);
@@ -23,16 +30,35 @@ export default function Scene() {
     setParticlesInitialized(true);
   }, []);
 
-  // WARNING popup state & threshold
-  const [showWarning, setShowWarning] = useState(false);
-  const warningTimerRef = useRef(null);
-  const PARTICLE_WARNING_THRESHOLD = 130; // change this threshold as you like
-  const WARNING_AUTO_DISMISS_MS = 5000;
+  // Read threshold value from CSS variable (so you can set it per breakpoint in CSS)
+  const readThresholdFromCSS = () => {
+    try {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--particle-threshold-default') || '';
+      const parsed = parseInt(raw.trim(), 10);
+      if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+    } catch (e) {
+      // ignore and fallback
+    }
+    // fallback mapping if CSS var not present
+    const w = window.innerWidth;
+    if (w < 420) return 60;
+    if (w < 768) return 100;
+    if (w < 1200) return 120;
+    return 140;
+  };
+
+  // set initial threshold and update on resize
+  useEffect(() => {
+    const setFromCSS = () => setParticleThreshold(readThresholdFromCSS());
+    setFromCSS();
+    const onResize = () => setFromCSS();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // watch particle count and show popup when threshold exceeded
   useEffect(() => {
-    if (currentParticleCount > PARTICLE_WARNING_THRESHOLD) {
-      // don't retrigger if already shown
+    if (currentParticleCount > particleThreshold) {
       if (!showWarning) {
         setShowWarning(true);
         if (warningTimerRef.current) {
@@ -43,23 +69,18 @@ export default function Scene() {
           warningTimerRef.current = null;
         }, WARNING_AUTO_DISMISS_MS);
       }
-    }
-    // if count drops below threshold, hide the warning immediately
-    if (currentParticleCount <= PARTICLE_WARNING_THRESHOLD && showWarning) {
-      setShowWarning(false);
-      if (warningTimerRef.current) {
-        clearTimeout(warningTimerRef.current);
-        warningTimerRef.current = null;
+    } else {
+      // hide immediately if back under
+      if (showWarning) {
+        setShowWarning(false);
+        if (warningTimerRef.current) {
+          clearTimeout(warningTimerRef.current);
+          warningTimerRef.current = null;
+        }
       }
     }
-    // cleanup on unmount
-    return () => {
-      if (warningTimerRef.current) {
-        clearTimeout(warningTimerRef.current);
-        warningTimerRef.current = null;
-      }
-    };
-  }, [currentParticleCount, showWarning]);
+    // cleanup handled by return of other effects
+  }, [currentParticleCount, particleThreshold, showWarning]);
 
   const closeWarning = () => {
     setShowWarning(false);
@@ -69,6 +90,7 @@ export default function Scene() {
     }
   };
 
+  // charging / launch logic (unchanged from your original)
   const chargeTimerRef = useRef(null);
   const wasChargedRef = useRef(false);
   const pressStartTime = useRef(null);
@@ -137,7 +159,6 @@ export default function Scene() {
       
       <ParticleInfo 
         particleCount={currentParticleCount} 
-        // keep it visible always; we'll still pass init state if needed elsewhere
         isInitialized={particlesInitialized}
       />
 
@@ -147,7 +168,7 @@ export default function Scene() {
           <div className="particle-warning-card">
             <div className="particle-warning-title">Particle Limit Exceeded</div>
             <div className="particle-warning-message">
-              Particle count is {currentParticleCount}, which exceeds the safe threshold ({PARTICLE_WARNING_THRESHOLD}).
+              Particle count is <strong>{currentParticleCount}</strong>, which exceeds the safe threshold (<strong>{particleThreshold}</strong>).
             </div>
             <div className="particle-warning-actions">
               <button onClick={closeWarning} className="particle-warning-close" aria-label="Close warning">
@@ -163,6 +184,7 @@ export default function Scene() {
         <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub"><FaGithub /></a>
         <a href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin /></a>
       </nav>
+
       <div className="hero-content">
         <h1>
           Ayan Sen

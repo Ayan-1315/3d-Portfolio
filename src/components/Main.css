@@ -21,6 +21,14 @@
   --accent-teal: rgba(25,215,201,1);
   --bg-grad-start: #071016;
   --bg-grad-end: #071214;
+
+  /* --- PARTICLE THRESHOLDS (editable per breakpoint) ---
+     The React code reads --particle-threshold-default at runtime.
+     Change these values to adjust when the warning triggers.
+  */
+  --particle-threshold-default: 140; /* desktop/large default */
+  --particle-threshold-tablet: 120;
+  --particle-threshold-mobile: 60;
 }
 
 /* resets */
@@ -46,11 +54,10 @@ body {
 
   /* --- UPDATED: Add a transparent-to-dark gradient over the image --- */
   background-image: linear-gradient(
-                      rgba(0, 0, 0, 0.71), /* Adjust this opacity for more or less darkness */
-                      rgba(0, 0, 0, 0.796)  /* Adjust this opacity for more or less darkness */
+                      rgba(0, 0, 0, 0.71),
+                      rgba(0, 0, 0, 0.796)
                     ), 
                     url('../assets/noise.png'); /* Your image URL here */
-  
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -82,6 +89,8 @@ body {
   --social-right-m-default: calc(var(--social-right-m-base) * 1);
   --social-top-m-default: calc(var(--social-top-m-base) * 1);
   --social-size-default: var(--social-size-base);
+  /* make sure default threshold var is present */
+  --particle-threshold-default: var(--particle-threshold-default);
 }
 
 /* ======================================================================== */
@@ -94,18 +103,21 @@ body {
     --hero-top-m-default: calc(var(--hero-top-m-base) * 0.98);
     --content-max-width-default: calc(var(--content-max-width-base) * 1.18);
     --headline-scale-default: calc(var(--headline-scale-base) * 1.04);
+    /* threshold remains default for large desktop */
+    --particle-threshold-default: 160;
   }
 }
 
 /* --- 4K & Ultra-Wide Desktops (NEW) --- */
 @media (min-width: 2200px) {
   :root {
-    --hero-top-m-default: calc(var(--hero-top-m-base) * 1.2);      /* Move content down */
-    --hero-left-m-default: calc(var(--hero-left-m-base) * 1.5);    /* Move content right */
-    --content-max-width-default: calc(var(--content-max-width-base) * 1.6); /* Allow more width */
-    --headline-scale-default: calc(var(--headline-scale-base) * 1.5);      /* Much larger headline */
-    --subtitle-scale-default: calc(var(--subtitle-scale-base) * 1.4);      /* Larger subtitle */
-    --social-size-default: calc(var(--social-size-base) * 1.3);            /* Bigger icons */
+    --hero-top-m-default: calc(var(--hero-top-m-base) * 1.2);
+    --hero-left-m-default: calc(var(--hero-left-m-base) * 1.5);
+    --content-max-width-default: calc(var(--content-max-width-base) * 1.6);
+    --headline-scale-default: calc(var(--headline-scale-base) * 1.5);
+    --subtitle-scale-default: calc(var(--subtitle-scale-base) * 1.4);
+    --social-size-default: calc(var(--social-size-base) * 1.3);
+    --particle-threshold-default: 200; /* more particles allowed on very large screens */
   }
 }
 
@@ -114,10 +126,10 @@ body {
   :root {
     --headline-scale-default: calc(var(--headline-scale-base) * 0.86);
     --subtitle-scale-default: calc(var(--subtitle-scale-base) * 0.98);
-    /* Make social icons smaller */
     --social-size-default: 34px;
+    /* mobile threshold */
+    --particle-threshold-default: var(--particle-threshold-mobile);
   }
-  /* Reposition hero content to be more centered vertically */
   .hero-content {
     top: 28vh;
     left: 6%;
@@ -125,7 +137,6 @@ body {
     max-width: 100%;
     padding-right: 0;
   }
-  /* Reposition social icons */
   .social-icons {
     top: 4vh;
     right: 5vw;
@@ -141,6 +152,12 @@ body {
   }
 }
 
+/* Tablet-ish */
+@media (min-width: 521px) and (max-width: 1199px) {
+  :root {
+    --particle-threshold-default: var(--particle-threshold-tablet);
+  }
+}
 
 /* final vars */
 :root{
