@@ -31,6 +31,43 @@
   --particle-threshold-mobile: 60;
 }
 
+/* near top :root */
+:root {
+  /* fallback if not overridden */
+  --particle-warning-default: 160;
+  --particle-warning-320: 70;
+  --particle-warning-375: 90;
+  --particle-warning-425: 110;
+  --particle-warning-786: 150;
+  --particle-warning-1024: 170;
+  --particle-warning-1440: 210;
+  --particle-warning-2560: 310;
+}
+
+/* override per breakpoint (use ranges that match your site) */
+@media (max-width: 320px) {
+  :root { --particle-warning: var(--particle-warning-320); }
+}
+@media (min-width: 321px) and (max-width: 375px) {
+  :root { --particle-warning: var(--particle-warning-375); }
+}
+@media (min-width: 376px) and (max-width: 425px) {
+  :root { --particle-warning: var(--particle-warning-425); }
+}
+@media (min-width: 426px) and (max-width: 786px) {
+  :root { --particle-warning: var(--particle-warning-786); }
+}
+@media (min-width: 787px) and (max-width: 1024px) {
+  :root { --particle-warning: var(--particle-warning-1024); }
+}
+@media (min-width: 1025px) and (max-width: 1440px) {
+  :root { --particle-warning: var(--particle-warning-1440); }
+}
+@media (min-width: 1441px) {
+  :root { --particle-warning: var(--particle-warning-2560); }
+}
+
+
 /* resets */
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; padding: 0; }

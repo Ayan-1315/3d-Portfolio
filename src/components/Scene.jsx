@@ -1,7 +1,7 @@
 // src/components/Scene.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import ParticleBackground from "./ParticleBackground";
-import ParticleInfo from './ParticleInfo';
+import ParticleInfo from "./ParticleInfo";
 import "./Main.css"; // Main.css / Hero.css (you provided)
 import "./ParticleInfo.css";
 import { FaInstagram, FaGithub, FaLinkedin } from "react-icons/fa";
@@ -12,7 +12,7 @@ export default function Scene() {
   const [powering, setPowering] = useState(false);
   const [launched, setLaunched] = useState(false);
   const [charging, setCharging] = useState(false);
-  const [launchPower, setLaunchPower] = useState('');
+  const [launchPower, setLaunchPower] = useState("");
   const [currentParticleCount, setCurrentParticleCount] = useState(0);
   const [particlesInitialized, setParticlesInitialized] = useState(false);
 
@@ -21,56 +21,74 @@ export default function Scene() {
   const warningTimerRef = useRef(null);
   const [particleThreshold, setParticleThreshold] = useState(140); // fallback
   const WARNING_AUTO_DISMISS_MS = 5000;
+  const PUSH_QUANTITY = 3;
+
+  // HYSTERESIS: do not show again until increased by this many from last shown
+  const HYSTERESIS_COUNT = 30;
+  const lastShownRef = useRef(null); // remembers last particle count when we showed warning
 
   const handleParticleCountChange = useCallback((count) => {
-    setCurrentParticleCount(count);
+    const parsed = Number(count) || 0;
+    // debug: log raw and parsed values
+    // eslint-disable-next-line no-console
+    console.debug("[Scene] handleParticleCountChange ->", {
+      raw: count,
+      parsed,
+    });
+    setCurrentParticleCount(parsed);
   }, []);
-  
+
   const handleParticlesInit = useCallback(() => {
     setParticlesInitialized(true);
   }, []);
 
-  // Read threshold value from CSS variable (so you can set it per breakpoint in CSS)
-  const readThresholdFromCSS = () => {
-    try {
-      const raw = getComputedStyle(document.documentElement).getPropertyValue('--particle-threshold-default') || '';
-      const parsed = parseInt(raw.trim(), 10);
-      if (!Number.isNaN(parsed) && parsed > 0) return parsed;
-    } catch (e) {
-      // ignore and fallback
-    }
-    // fallback mapping if CSS var not present
-    const w = window.innerWidth;
-    if (w < 420) return 60;
-    if (w < 768) return 100;
-    if (w < 1200) return 120;
-    return 140;
-  };
-
-  // set initial threshold and update on resize
+  // Read threshold from CSS var on mount & resize (uses --particle-warning)
   useEffect(() => {
+    const readThresholdFromCSS = () => {
+      try {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue('--particle-warning') || '';
+        const parsed = parseInt(raw.trim(), 10);
+        if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+      } catch (e) {}
+      return 140; // fallback
+    };
+
     const setFromCSS = () => setParticleThreshold(readThresholdFromCSS());
     setFromCSS();
+
     const onResize = () => setFromCSS();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // watch particle count and show popup when threshold exceeded
+  // The watcher with hysteresis: only show when:
+  // - current >= particleThreshold
+  // AND
+  // - lastShownRef.current === null OR current >= lastShownRef.current + HYSTERESIS_COUNT
   useEffect(() => {
-    if (currentParticleCount > particleThreshold) {
-      if (!showWarning) {
+    if (currentParticleCount >= particleThreshold) {
+      const shouldShow =
+        lastShownRef.current === null ||
+        currentParticleCount >= (lastShownRef.current + HYSTERESIS_COUNT);
+
+      if (shouldShow && !showWarning) {
         setShowWarning(true);
-        if (warningTimerRef.current) {
-          clearTimeout(warningTimerRef.current);
-        }
+        lastShownRef.current = currentParticleCount; // remember where we showed it
+        if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+
         warningTimerRef.current = setTimeout(() => {
           setShowWarning(false);
           warningTimerRef.current = null;
         }, WARNING_AUTO_DISMISS_MS);
       }
     } else {
-      // hide immediately if back under
+      // If count falls sufficiently below threshold you might want to reset lastShownRef.
+      // Optionally reset so user can trigger warning again after dropping low then rising back.
+      // Example: if it drops below threshold - HYSTERESIS, reset:
+      if (lastShownRef.current !== null && currentParticleCount <= (particleThreshold - HYSTERESIS_COUNT)) {
+        lastShownRef.current = null;
+      }
+
       if (showWarning) {
         setShowWarning(false);
         if (warningTimerRef.current) {
@@ -79,8 +97,57 @@ export default function Scene() {
         }
       }
     }
-    // cleanup handled by return of other effects
   }, [currentParticleCount, particleThreshold, showWarning]);
+
+  // Attach a single pointerdown listener to the tsparticles canvas so clicks increment the React counter.
+  // This is intentionally minimal and purely additive — it doesn't alter the particles themselves.
+  useEffect(() => {
+    let canvasEl = null;
+
+    const attachListener = () => {
+      // locate the canvas generated by tsparticles
+      const canvas = document.querySelector("#tsparticles canvas");
+      if (!canvas || canvas === canvasEl) return;
+
+      // remove previous if present
+      if (canvasEl && canvasEl.__ps_inc) {
+        canvasEl.removeEventListener("pointerdown", canvasEl.__ps_inc);
+        delete canvasEl.__ps_inc;
+      }
+
+      const onPointerDown = (ev) => {
+        // increment displayed count by push quantity
+        setCurrentParticleCount((prev) => Number(prev || 0) + PUSH_QUANTITY);
+      };
+
+      canvas.addEventListener("pointerdown", onPointerDown);
+      // store handler so we can remove later
+      canvas.__ps_inc = onPointerDown;
+      canvasEl = canvas;
+    };
+
+    // attach immediately if canvas already in DOM
+    attachListener();
+
+    // If the canvas is mounted later (remounts when particleCount key changes),
+    // watch for DOM additions and reattach automatically.
+    const mo = new MutationObserver(() => attachListener());
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    // Also re-run attach on window resize (useful if canvas is recreated)
+    const onResize = () => attachListener();
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      // cleanup
+      if (canvasEl && canvasEl.__ps_inc) {
+        canvasEl.removeEventListener("pointerdown", canvasEl.__ps_inc);
+        delete canvasEl.__ps_inc;
+      }
+      mo.disconnect();
+      window.removeEventListener("resize", onResize);
+    };
+  }, []); // run once
 
   const closeWarning = () => {
     setShowWarning(false);
@@ -120,13 +187,13 @@ export default function Scene() {
     setIsAnimating(true);
     setCharging(false);
     setPowering(true);
-    let power = 'launch-low';
+    let power = "launch-low";
     let cleanupDuration = 1200;
     if (wasChargedRef.current) {
-      power = 'launch-high';
+      power = "launch-high";
       cleanupDuration = 2000;
     } else if (holdDuration > MEDIUM_POWER_THRESHOLD_MS) {
-      power = 'launch-medium';
+      power = "launch-medium";
       cleanupDuration = 1600;
     }
     setTimeout(() => {
@@ -137,7 +204,7 @@ export default function Scene() {
     setTimeout(() => {
       setLaunched(false);
       setPowering(false);
-      setLaunchPower('');
+      setLaunchPower("");
       setIsAnimating(false);
     }, cleanupDuration);
   };
@@ -152,26 +219,37 @@ export default function Scene() {
 
   return (
     <section className="hero-container" ref={heroRef}>
-      <ParticleBackground 
-        onCountChange={handleParticleCountChange} 
-        onInitialized={handleParticlesInit} 
+      <ParticleBackground
+        onCountChange={handleParticleCountChange}
+        onInitialized={handleParticlesInit}
       />
-      
-      <ParticleInfo 
-        particleCount={currentParticleCount} 
+
+      <ParticleInfo
+        particleCount={currentParticleCount}
         isInitialized={particlesInitialized}
       />
 
       {/* Warning popup --- appears when particle count is over threshold */}
       {showWarning && (
-        <div className="particle-warning-overlay" role="alert" aria-live="assertive">
+        <div
+          className="particle-warning-overlay"
+          role="alert"
+          aria-live="assertive"
+        >
           <div className="particle-warning-card">
-            <div className="particle-warning-title">Particle Limit Exceeded</div>
+            <div className="particle-warning-title">
+              Particle Limit Exceeded
+            </div>
             <div className="particle-warning-message">
-              Particle count is <strong>{currentParticleCount}</strong>, which exceeds the safe threshold (<strong>{particleThreshold}</strong>).
+              Particle count is <strong>{currentParticleCount}</strong>, which
+              exceeds the safe threshold (<strong>{particleThreshold}</strong>).
             </div>
             <div className="particle-warning-actions">
-              <button onClick={closeWarning} className="particle-warning-close" aria-label="Close warning">
+              <button
+                onClick={closeWarning}
+                className="particle-warning-close"
+                aria-label="Close warning"
+              >
                 Dismiss
               </button>
             </div>
@@ -180,9 +258,30 @@ export default function Scene() {
       )}
 
       <nav className="social-icons">
-        <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram"><FaInstagram /></a>
-        <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub"><FaGithub /></a>
-        <a href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin /></a>
+        <a
+          href="https://instagram.com"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Instagram"
+        >
+          <FaInstagram />
+        </a>
+        <a
+          href="https://github.com"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="GitHub"
+        >
+          <FaGithub />
+        </a>
+        <a
+          href="https://linkedin.com"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="LinkedIn"
+        >
+          <FaLinkedin />
+        </a>
       </nav>
 
       <div className="hero-content">
