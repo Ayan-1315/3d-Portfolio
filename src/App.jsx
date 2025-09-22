@@ -1,10 +1,10 @@
 import React from "react";
-import Scene from "./components/Scene";
+import HomePage from "./pages/HomePage";
 
 export default function App() {
   return (
     <div className="app-root">
-      <Scene />
+      <HomePage />
     </div>
   );
 }
