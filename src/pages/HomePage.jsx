@@ -1,26 +1,36 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Scene from "../components/Scene";
 import HangingSocials from "../components/HangingSocials";
-import "../components/Main.css"; // We'll add styles here later
+import "../components/Main.css";
 
-/**
- * HomePage: Manages the multi-page layout.
- * It renders the main hero Scene as the first page, followed by project placeholders.
- * The HangingSocials component is overlaid on top of everything.
- */
 export default function HomePage() {
-  // You have 4 projects, so that's 1 hero page + 3 project pages = 4 total sections.
-  // The anchors array below will have 3 items for 3 social icons.
   const projectPageCount = 3;
+  
+  // CHANGE: Add state to track if user has scrolled
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Set state to true if scrolled more than 10 pixels
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+        // Remove listener after it has triggered once
+        window.removeEventListener('scroll', handleScroll);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Cleanup listener on component unmount
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []); // Empty dependency array means this effect runs only once on mount
 
   return (
     <div className="site-root">
-      {/* Page 1: The Hero Scene */}
       <section className="page page-hero">
         <Scene />
       </section>
 
-      {/* Subsequent pages for your projects */}
       {Array.from({ length: projectPageCount }).map((_, idx) => (
         <section key={idx} className={`page page-project-${idx + 1}`}>
           <div className="project-placeholder">
@@ -32,13 +42,8 @@ export default function HomePage() {
         </section>
       ))}
 
-      {/* The physics-enabled social icons overlay.
-        The `anchors` prop tells the component which page each rope is attached to.
-        - Icon 0 (Instagram) is anchored to Page 0 (Hero).
-        - Icon 1 (GitHub) is anchored to Page 1 (Project 1).
-        - Icon 2 (LinkedIn) is anchored to Page 2 (Project 2).
-      */}
-      <HangingSocials anchors={[0, 1, 2]} />
+      {/* CHANGE: Conditionally render HangingSocials only when isScrolled is true */}
+      {isScrolled && <HangingSocials anchors={[0, 1, 2]} />}
     </div>
   );
 }
