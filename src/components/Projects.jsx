@@ -1,9 +1,9 @@
 import React from 'react';
-import './Main.css'; // We'll add styles for this
+import './Main.css';
 
 const Projects = () => {
   return (
-    <div className="projects-container">
+    <section className="projects-section">
       <div className="project-card">
         <h2>Project #1: E-Commerce Platform</h2>
         <p>A full-stack e-commerce website built with the MERN stack, featuring product browsing, a shopping cart, user authentication with JWT, and a Stripe integration for payments.</p>
@@ -20,9 +20,7 @@ const Projects = () => {
         <h2>Project #4: Data Visualization Dashboard</h2>
         <p>A dashboard for visualizing complex datasets using D3.js and React. Fetches data from a public API and renders interactive charts and graphs for insightful analysis.</p>
       </div>
-      {/* Add a little extra space at the bottom */}
-      <div style={{ height: '30vh' }} /> 
-    </div>
+    </section>
   );
 };
 
