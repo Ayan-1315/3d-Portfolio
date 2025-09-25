@@ -34,7 +34,7 @@ body {
   background-color: var(--bg-grad-start);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Let the body scroll naturally */
+  /* This ensures the entire page can scroll naturally */
 }
 
 /* This ::before creates the fixed background image/gradient layer */
@@ -46,14 +46,14 @@ body {
     url("../assets/noise.png");
   background-size: cover;
   background-position: center;
-  z-index: 0;
+  z-index: -1; /* Sits above particles */
   pointer-events: none;
 }
 
 #tsparticles {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 1 !important; /* Sit behind everything */
+  z-index: -1 !important; /* Sits behind everything */
   pointer-events: none;
 }
 
@@ -187,6 +187,8 @@ body {
 
 /* --- New Styles for Projects Section --- */
 .projects-section {
+  position: relative; /* This ensures it renders correctly above the fixed ::before element */
+  z-index: 1;
   width: 100%;
   padding: 10vh var(--hero-left);
   background-color: rgba(7, 18, 20, 0.5);
@@ -254,7 +256,7 @@ body {
   pointer-events: none;
 }
 
-/* ... (All styles for code-icon, animations, and FPS warning remain the same) ... */
+/* --- All original styles for code-icon, animations, etc. follow --- */
 .code-icon {
   display: inline-block;
   position: relative;
