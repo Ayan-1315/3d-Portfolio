@@ -1,6 +1,8 @@
 import React from "react";
 import Scene from "../components/Scene";
-import Projects from "../components/Projects";
+// Import each project component individually
+import { Project1, Project2, Project3, Project4 } from "../components/Projects";
+import "../components/Main.css";
 
 export default function HomePage() {
   return (
@@ -10,8 +12,19 @@ export default function HomePage() {
         <Scene />
       </section>
 
-      {/* Section 2: The Projects Content */}
-      <Projects />
+      {/* Each project is now its own full-page section */}
+      <section className="project-page">
+        <Project1 />
+      </section>
+      <section className="project-page">
+        <Project2 />
+      </section>
+      <section className="project-page">
+        <Project3 />
+      </section>
+      <section className="project-page">
+        <Project4 />
+      </section>
     </div>
   );
 }
