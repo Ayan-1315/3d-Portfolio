@@ -1,7 +1,6 @@
 import React from "react";
 import Scene from "../components/Scene";
 import Projects from "../components/Projects";
-import "../components/Main.css";
 
 export default function HomePage() {
   return (
