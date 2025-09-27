@@ -1,4 +1,3 @@
-// src/components/ParticleBackground.jsx
 import React, { useEffect, useState, useMemo, memo } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadFull } from "tsparticles";
@@ -37,6 +36,8 @@ const ParticleBackground = ({ onInitialized }) => {
       background: { color: "transparent" },
       detectRetina: true,
       fpsLimit: 60,
+      // THIS IS THE FIX: It tells the particles to ignore scroll gestures.
+      motion: { disable: true },
       particles: {
         number: {
           value: particleCount,

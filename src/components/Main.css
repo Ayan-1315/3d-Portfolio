@@ -17,15 +17,15 @@
   --bg-grad-end: #071214;
 }
 
-/* resets */
+/* --- RESETS & SCROLLING FIX --- */
 * {
   box-sizing: border-box;
 }
-html,
-body,
-#root {
-  margin: 0;
-  padding: 0;
+
+html {
+  height: 100%;
+  scroll-behavior: smooth; /* Makes anchor link scrolling smooth */
+  overflow-x: hidden;
 }
 
 body {
@@ -34,11 +34,20 @@ body {
   background-color: var(--bg-grad-start);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+
+  /* This is the key fix for touch devices. It forces the browser
+     to correctly handle the scrollable area. */
+  width: 100%;
+  overflow-x: hidden;
 }
 
-/* ======================================================================== */
-/* ---               DEFINITIVE Z-INDEX STACKING FIX                  --- */
-/* ======================================================================== */
+#root, .App {
+  min-height: 100%;
+}
+/* --- END OF FIX --- */
+
 
 /* BOTTOM LAYER (-2): Background Image */
 .site-root::before {
@@ -64,7 +73,7 @@ body {
 /* TOP LAYER (1+): All Page Content */
 .hero-container,
 .project-page {
-  position: relative; /* This is crucial for z-index to work */
+  position: relative;
   z-index: 1;
 }
 
@@ -74,14 +83,11 @@ body {
   position: absolute;
   z-index: 2;
 }
-/* --- END OF FIX --- */
-
 
 .hero-container {
   min-height: 100vh;
 }
 
-/* --- All your variables and media queries for layout --- */
 :root {
   --hero-left-m-default: calc(var(--hero-left-m-base) * 1);
   --hero-top-m-default: calc(var(--hero-top-m-base) * 1);
@@ -148,7 +154,6 @@ body {
 .social-icons a { color: rgba(255, 255, 255, 0.9); font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; width: var(--social-size); height: var(--social-size); border-radius: 10px; text-decoration: none; transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease; background: rgba(255, 255, 255, 0.02); padding: 6px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
 .social-icons a:hover { color: var(--accent-teal); background: rgba(25, 215, 202, 0.042); box-shadow: 0 6px 18px rgba(var(--teal-rgb), 0.26); }
 
-/* Styles for each full-height project page */
 .project-page {
   width: 100%;
   min-height: 100vh;
@@ -157,20 +162,16 @@ body {
   align-items: center;
   padding: 5vh 5%;
 }
-
-/* Styles for the unboxed project text */
 .project-content {
   max-width: var(--content-max-width-base);
   text-align: center;
 }
-
 .project-content h2 {
   margin: 0 0 1rem 0;
   color: var(--accent-teal);
   font-size: 2.5rem;
   font-weight: 600;
 }
-
 .project-content p {
   margin: 0;
   font-size: 1.1rem;
@@ -193,9 +194,6 @@ body {
   .project-content p { font-size: 1rem; }
 }
 
-/* REMOVED: .hanging-socials-canvas rule is gone */
-
-/* ... (All styles for code-icon, animations, and FPS warning remain the same) ... */
 .code-icon { display: inline-block; position: relative; padding: 0 0.36em; margin: 0; background: none; border: none; outline: none; box-shadow: none; cursor: pointer; color: var(--accent-teal); font-weight: 700; font-size: 1.05em; line-height: 1; z-index: 3; will-change: transform; overflow: visible; -webkit-font-smoothing: antialiased; }
 .code-icon:focus { outline: none; }
 .code-icon:focus-visible { outline: 2px solid rgba(var(--teal-rgb), 0.12); outline-offset: 4px; border-radius: 4px; }
