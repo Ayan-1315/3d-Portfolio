@@ -1,5 +1,44 @@
 /* src/components/Main.css */
+/* Import Google Font */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap");
+
+/* Base setup */
+html, body {
+  font-family: "Poppins", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  height: auto;
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+/* Inherit font everywhere */
+*, *::before, *::after {
+  font-family: inherit !important;
+}
+
+/* Forms (iOS/Android default override) */
+input, textarea, select, button {
+  font: inherit !important;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+/* SVG text (charts/icons) */
+svg text, svg tspan {
+  font-family: "Poppins", sans-serif !important;
+}
+
+/* Common UI libs (Material-UI, Chakra, Ant, portals) */
+:where([class*="Mui"], [class*="chakra-"], [class*="ant-"], [data-reach-portal] *) {
+  font-family: inherit !important;
+}
+
+/* Optional: emoji fallback */
+.emoji, .has-emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Poppins", sans-serif !important;
+}
 
 :root {
   --grid-unit: 12.5%;
