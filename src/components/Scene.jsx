@@ -224,7 +224,7 @@ export default function Scene() {
         </h1>
         <p className="subtitle">Software Developer</p>
         <div className="hero-divider" />
-        <p className="tagline">Passionate about building innovative solutions.</p>
+        <p className="tagline">Innovation begins where limits end</p>
       </div>
     </section>
   );
