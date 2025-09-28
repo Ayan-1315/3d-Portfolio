@@ -198,9 +198,9 @@ export default function Scene() {
         {renderWarning()}
       </div>
       <nav className="social-icons">
-        <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram"><FaInstagram /></a>
-        <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub"><FaGithub /></a>
-        <a href="https://linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin /></a>
+        <a href="https://www.instagram.com/_ayan.s__" target="_blank" rel="noreferrer" aria-label="Instagram"><FaInstagram /></a>
+        <a href="https://github.com/Ayan-1315" target="_blank" rel="noreferrer" aria-label="GitHub"><FaGithub /></a>
+        <a href="https://www.linkedin.com/in/ayan-sen-1315abc" target="_blank" rel="noreferrer" aria-label="LinkedIn"><FaLinkedin /></a>
       </nav>
       <div className="hero-content">
         <h1>
